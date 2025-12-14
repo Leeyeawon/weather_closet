@@ -1,0 +1,127 @@
+{% extends "index.html" %}
+{% block title %}옷장{% endblock %}
+{% block header_title %}내 옷장{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="row">
+    <span class="mini primary"></span>
+    <div class="card-title primary">이번 달 인사이트</div>
+  </div>
+  <p class="desc">지난 30일 동안, 상의는 주로 니트류를,<br>바지는 슬랙스를 많이 입었어요.</p>
+</section>
+
+<h3 class="h3">즐겨찾기 코디</h3>
+<section class="card list">
+  <div class="fav-row">
+    <div class="thumb"></div>
+    <div class="fav-info">
+      <div class="fav-date">2025.01.15</div>
+      <div class="fav-sub">체감온도 8°C · 맑음</div>
+      <button class="chip-btn">비슷한 날씨 다시 보기</button>
+    </div>
+    <div class="star"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="fav-row">
+    <div class="thumb"></div>
+    <div class="fav-info">
+      <div class="fav-date">2025.01.12</div>
+      <div class="fav-sub">체감온도 12°C · 흐림</div>
+      <button class="chip-btn">비슷한 날씨 다시 보기</button>
+    </div>
+    <div class="star"></div>
+  </div>
+</section>
+
+<h3 class="h3">아이템 사용 통계</h3>
+<section class="card">
+  <div class="small-title">이번 달 가장 많이 입은 아이템</div>
+
+  <div class="stat-row">
+    <div class="mini-thumb"></div>
+    <div class="stat-info">
+      <div class="stat-name">크림 롱코트</div>
+      <div class="stat-sub">아우터</div>
+    </div>
+    <div class="stat-count">8회</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="mini-thumb"></div>
+    <div class="stat-info">
+      <div class="stat-name">베이지 니트</div>
+      <div class="stat-sub">상의</div>
+    </div>
+    <div class="stat-count">6회</div>
+  </div>
+
+  <div class="notice">이번 달 가장 자주 입은 아우터는 '크림 롱코트'예요.<br>8번 착용했습니다.</div>
+</section>
+
+<section class="card">
+  <div class="small-title">최근 60일간 입지 않은 아이템</div>
+  <div class="stat-row">
+    <div class="mini-thumb"></div>
+    <div class="stat-info">
+      <div class="stat-name">블랙 조끼</div>
+      <div class="stat-sub">아우터 · 2024.10.15</div>
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="mini-thumb"></div>
+    <div class="stat-info">
+      <div class="stat-name">블랙 부츠</div>
+      <div class="stat-sub">신발 · 착용 기록 없음</div>
+    </div>
+  </div>
+</section>
+
+<h3 class="h3">정리 후보 아이템</h3>
+<div class="muted">6개월 이상 착용하지 않은 아이템들이에요</div>
+
+<section class="card clean">
+  <div class="clean-row">
+    <div class="clean-thumb"></div>
+    <div class="clean-info">
+      <div class="clean-name">화이트 셔츠</div>
+      <div class="clean-sub">상의 · 2024.06.20</div>
+      <div class="checks">
+        <label class="check"><input type="checkbox" checked> 버릴 후보</label>
+        <label class="check"><input type="checkbox"> 기부 후보</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="clean-row">
+    <div class="clean-thumb"></div>
+    <div class="clean-info">
+      <div class="clean-name">그레이 카디건</div>
+      <div class="clean-sub">상의 · 2024.06.20</div>
+      <div class="checks">
+        <label class="check"><input type="checkbox"> 버릴 후보</label>
+        <label class="check"><input type="checkbox" checked> 기부 후보</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="clean-row">
+    <div class="clean-thumb"></div>
+    <div class="clean-info">
+      <div class="clean-name">레드 운동화</div>
+      <div class="clean-sub">신발 · 착용 기록 없음</div>
+      <div class="checks">
+        <label class="check"><input type="checkbox" checked> 버릴 후보</label>
+        <label class="check"><input type="checkbox"> 기부 후보</label>
+      </div>
+    </div>
+  </div>
+
+  <button class="cta dark">선택한 아이템 정리하기</button>
+</section>
+{% endblock %}
+
+
+

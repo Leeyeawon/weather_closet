@@ -1,0 +1,123 @@
+{% extends "index.html" %}
+{% block title %}코디{% endblock %}
+{% block header_title %}StyleFit{% endblock %}
+
+{% block content %}
+<section class="coord-top">
+  <div class="coord-loc">
+    <span class="pin"></span><span>서울 강남구</span>
+  </div>
+  <div class="coord-row">
+    <div class="coord-temp">8°C</div>
+    <div class="coord-meta">
+      <div>체감 5°C</div>
+      <div class="meta-line">
+        <span class="mini gray"></span> 65%
+        <span class="dot"></span>
+        <span class="mini gray"></span> 2.5m/s
+        <span class="dot"></span>
+        <span class="mini gray"></span> 10%
+      </div>
+    </div>
+    <div class="coord-date">2025.12.10 (수)</div>
+  </div>
+
+  <div class="badge-row">
+    <div class="badge"><div class="b-k">미세먼지</div><div class="b-v">나쁨</div></div>
+    <div class="badge"><div class="b-k">초미세먼지</div><div class="b-v">보통</div></div>
+    <div class="badge"><div class="b-k">자외선</div><div class="b-v">낮음</div></div>
+  </div>
+</section>
+
+<h3 class="h3">오늘의 추천 아이템</h3>
+<section class="card">
+  <div class="imgbox">이미지</div>
+  <div class="item-title">크림 니트</div>
+  <p class="item-desc">오늘 같은 쌀쌀한 날씨에 딱 맞는 따뜻하고 부드러운 니트예요. 심플한 디자인으로 다양한 코디에 활용하기 좋아요.</p>
+
+  <button class="ghost-btn">
+    <span class="mini primary"></span>
+    다른 아이템 보기
+    <span class="ghost-right">1/3</span>
+  </button>
+</section>
+
+<h3 class="h3">건강 & 보조 아이템 추천</h3>
+<section class="list">
+  <div class="list-card">
+    <div class="list-ico"></div>
+    <div>
+      <div class="list-title">마스크 착용 권장</div>
+      <div class="list-desc">미세먼지가 나쁜 날이에요. 마스크를 꼭 챙겨보세요.</div>
+    </div>
+  </div>
+
+  <div class="list-card">
+    <div class="list-ico"></div>
+    <div>
+      <div class="list-title">자외선 차단</div>
+      <div class="list-desc">오늘은 자외선이 낮지만, 외출 시 선크림을 바르는 것을 추천해요.</div>
+    </div>
+  </div>
+</section>
+
+<h3 class="h3">나의 취향 설정</h3>
+<section class="card">
+  <div class="row-between">
+    <div class="card-title">나의 취향 설정</div>
+    <button class="text-btn"><span class="mini gray"></span>수정</button>
+  </div>
+
+  <div class="pref">
+    <div class="pref-k">회피 아이템</div>
+    <div class="tags"><span class="tag">#민소매</span><span class="tag">#반바지</span><span class="tag">#탑</span></div>
+  </div>
+  <div class="pref">
+    <div class="pref-k">스타일</div>
+    <div class="tags"><span class="tag">#캐주얼</span><span class="tag">#심플</span></div>
+  </div>
+</section>
+
+<h3 class="h3">오늘의 코디 예시</h3>
+<div class="imgwide">코디 이미지</div>
+
+<section class="card">
+  <div class="card-title">코디 구성</div>
+  <div class="kvline"><span class="k">상의:</span><span class="v">크림 니트</span></div>
+  <div class="kvline"><span class="k">하의:</span><span class="v">흑청 데님</span></div>
+  <div class="kvline"><span class="k">아우터:</span><span class="v">숏 패딩</span></div>
+  <div class="kvline"><span class="k">신발:</span><span class="v">화이트 스니커즈</span></div>
+
+  <button class="cta dark">
+    <span class="mini white"></span>
+    이 코디를 즐겨찾기로 저장하기
+  </button>
+</section>
+
+<h3 class="h3">내일 날씨 미리보기</h3>
+<section class="card preview">
+  <div class="preview-head">
+    <div class="preview-date">2025.01.16 (목)</div>
+    <div class="preview-diff"><span class="mini gray"></span>오늘보다 3°C 낮음</div>
+  </div>
+  <div class="preview-temp2">5°C</div>
+
+  <div class="preview-mini">
+    <span class="mini gray"></span> 70%
+    <span class="dot"></span>
+    <span class="mini gray"></span> 3m/s
+    <span class="dot"></span>
+    <span class="mini gray"></span> 보통
+  </div>
+
+  <div class="tip">
+    <span class="mini primary"></span>
+    <p>내일은 오늘보다 3°C 더 추워요. 오늘보다 한 단계 두꺼운 아우터를 준비해보세요.</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script defer src="{{ url_for('static', filename='js/coordination.js') }}"></script>
+{% endblock %}

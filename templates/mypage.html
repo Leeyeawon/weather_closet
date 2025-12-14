@@ -1,0 +1,81 @@
+{% extends "index.html" %}
+{% block title %}프로필{% endblock %}
+{% block header_title %}마이페이지{% endblock %}
+
+{% block content %}
+<section class="card profile">
+  <div class="profile-top">
+    <div class="avatar"></div>
+    <div>
+      <div class="name">이예원</div>
+      <div class="muted">스타일 프로필</div>
+    </div>
+  </div>
+
+  <div class="profile-kv">
+    <div class="pk">체감온도</div><div class="pv">#추위 민감</div>
+    <div class="pk">스타일</div><div class="pv">#러블리 #포멀</div>
+    <div class="pk">회피 아이템</div><div class="pv">#민소매 #반바지 #탑</div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="row-between">
+    <div class="card-title">회피 의상 관리</div>
+    <button class="text-btn">편집</button>
+  </div>
+
+  <div class="chip-row">
+    <span class="chip">민소매</span>
+    <span class="chip">반바지</span>
+    <span class="chip">탑</span>
+  </div>
+
+  <button class="ghost-btn">
+    <span class="mini gray"></span>
+    회피 아이템 추가
+  </button>
+</section>
+
+<section class="card">
+  <div class="card-title">취향(스타일) 설정</div>
+  <div class="slider">
+    <div class="slider-head"><span>캐주얼</span><span>포멀</span></div>
+    <div class="bar"><div class="fill w70"></div><div class="knob"></div></div>
+  </div>
+  <div class="slider">
+    <div class="slider-head"><span>심플</span><span>러블리</span></div>
+    <div class="bar"><div class="fill w55"></div><div class="knob"></div></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-title">건강 상태 설정</div>
+  <div class="checklist">
+    <label><input type="checkbox"> 비염</label>
+    <label><input type="checkbox" checked> 햇빛 알레르기</label>
+    <label><input type="checkbox"> 아토피/피부 민감</label>
+    <label><input type="checkbox"> 기압 변화에 따른 두통</label>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-title">보유 보조 아이템</div>
+  <div class="checklist">
+    <label><input type="checkbox" checked> 마스크</label>
+    <label><input type="checkbox" checked> 양산</label>
+    <label><input type="checkbox"> 모자</label>
+    <label><input type="checkbox"> 레인부츠</label>
+    <label><input type="checkbox" checked> 우비</label>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-title">알림 설정</div>
+  <div class="checklist">
+    <label><input type="checkbox" checked> 아침에 "오늘의 아이템" 알림</label>
+    <label><input type="checkbox" checked> 미세먼지 나쁜 날 마스크 알림</label>
+    <label><input type="checkbox"> 자외선 강한 날 양산/모자 알림</label>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}WeatherStyle{% endblock %}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  {# 현재 엔드포인트로 active 처리 #}
+  {% set ep = request.endpoint %}
+
+  <!-- ✅ 상단 흰바 + 햄버거: 모든 페이지 공통 -->
+  <header class="topbar">
+    <div class="bar-inner">
+      <button class="icon-btn" aria-label="메뉴">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <h1 class="topbar-title">{{ page_title or "WeatherStyle" }}</h1>
+
+      <!-- 오른쪽 공간 맞추기용 -->
+      <div class="topbar-spacer"></div>
+    </div>
+  </header>
+
+  <!-- ✅ 페이지별 내용만 바뀌는 영역 -->
+  <main class="page-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ✅ 하단바: 모든 페이지 공통 + 아이콘 이동 가능 -->
+  <nav class="bottom-nav" aria-label="하단 메뉴">
+    <a class="nav-item {{ 'active' if ep=='mypage' else '' }}" href="{{ url_for('mypage') }}">
+      <span class="nav-ico {{ 'primary' if ep=='mypage' else 'gray' }}"></span>
+      <span class="nav-text">프로필</span>
+    </a>
+
+    <a class="nav-item {{ 'active' if ep=='coordination' else '' }}" href="{{ url_for('coordination') }}">
+      <span class="nav-ico {{ 'primary' if ep=='coordination' else 'gray' }}"></span>
+      <span class="nav-text">코디</span>
+    </a>
+
+    <a class="nav-item {{ 'active' if ep=='closet' else '' }}" href="{{ url_for('closet') }}">
+      <span class="nav-ico {{ 'primary' if ep=='closet' else 'gray' }}"></span>
+      <span class="nav-text">옷장</span>
+    </a>
+  </nav>
+
+  {% block scripts %}
+    <script defer src="{{ url_for('static', filename='js/index.js') }}"></script>
+  {% endblock %}
+</body>
+</html>
