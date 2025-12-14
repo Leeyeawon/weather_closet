@@ -1,0 +1,19 @@
+.toast{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:88px;                 /* 탭바 위 */
+  background:#111;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:13px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+  z-index:999;
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(-4px);
+}

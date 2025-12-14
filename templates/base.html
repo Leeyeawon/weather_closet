@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}StyleFit{% endblock %}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      {% block topbar %}{% endblock %}
+    </header>
+
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+
+    <nav class="tabbar">
+      <a class="tab {% if active=='home' %}active{% endif %}" href="{{ url_for('index') }}">
+        <div class="tab-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M3 10.5l9-7 9 7V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10.5z"
+              stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="tab-txt">홈</div>
+      </a>
+
+      <a class="tab {% if active=='coordination' %}active{% endif %}" href="{{ url_for('coordination') }}">
+        <div class="tab-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M8 7h8M6 11h12M8 15h8M10 19h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="tab-txt">코디</div>
+      </a>
+
+      <a class="tab {% if active=='closet' %}active{% endif %}" href="{{ url_for('closet') }}">
+        <div class="tab-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M7 4h10v16H7V4z" stroke="currentColor" stroke-width="2"/>
+            <path d="M7 10h10" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="tab-txt">옷장</div>
+      </a>
+
+      <a class="tab {% if active=='mypage' %}active{% endif %}" href="{{ url_for('mypage') }}">
+        <div class="tab-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="tab-txt">프로필</div>
+      </a>
+    </nav>
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

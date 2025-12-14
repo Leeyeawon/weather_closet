@@ -1,0 +1,166 @@
+.section{ margin-top:18px; }
+.section-hd{ margin:0 0 10px; }
+.section-title{ font-size:18px; line-height:28px; font-weight:400; color:var(--text); }
+.section-sub{ margin-top:2px; font-size:12px; color:var(--muted2); }
+
+.pin{ color:var(--blue); }
+.w-full{ width:100%; }
+
+/* Insight */
+.insight{ padding:14px 16px; }
+.insight-hd{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.insight-title{ font-size:14px; color:var(--blue); }
+.insight-text{ margin:0; font-size:16px; color:var(--text); line-height:1.6; }
+
+/* List */
+.list{ padding:0; overflow:hidden; }
+.list-row{
+  display:flex;
+  gap:12px;
+  padding:14px 14px;
+  border-top:1px solid var(--line);
+  position:relative;
+}
+.list-row:first-child{ border-top:0; }
+.thumb{
+  width:73px; height:73px;
+  border-radius:10px;
+  object-fit:cover;
+  border:1px solid var(--line);
+  background:#eee;
+}
+.mini{
+  width:48px; height:48px;
+  border-radius:8px;
+  object-fit:cover;
+  border:1px solid var(--line);
+  background:#eee;
+}
+.list-body{ flex:1; min-width:0; }
+.list-title{ font-size:14px; color:var(--text); line-height:1.4; }
+.list-sub{ font-size:12px; color:var(--muted2); margin-top:4px; }
+.chip{
+  display:inline-block;
+  margin-top:8px;
+  padding:6px 10px;
+  border-radius:8px;
+  background:#F5F5F5;
+  color:#404040;
+  font-size:12px;
+  text-decoration:none;
+}
+.star{
+  position:absolute;
+  right:12px;
+  top:14px;
+  width:34px; height:34px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--blue);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.list-row.compact{ align-items:center; }
+
+/* Stats */
+.stats{ padding:14px 16px; }
+.stats-title{ font-size:14px; color:var(--text); margin-bottom:10px; }
+.stats-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 0;
+  border-top:1px dashed var(--line);
+}
+.stats-item:first-of-type{ border-top:0; padding-top:2px; }
+.stats-body{ flex:1; min-width:0; }
+.stats-name{ font-size:14px; color:var(--text); }
+.stats-cat{ font-size:12px; color:var(--muted2); margin-top:2px; }
+.stats-count{ font-size:14px; color:var(--text); }
+.stats-tip{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:12px;
+  color:#404040;
+  line-height:1.5;
+}
+
+/* Cleanup */
+.cleanup{ padding:14px 16px; }
+.legend{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:#111;
+}
+.legend-item input{ display:none; }
+.box{
+  width:14px; height:14px;
+  border-radius:2px;
+  border:1px solid #111;
+  background:#fff;
+  position:relative;
+}
+.box--fill{ background:var(--blue); border-color:var(--blue); }
+
+.cleanup-list{ display:flex; flex-direction:column; gap:12px; }
+.cleanup-row{
+  display:flex;
+  gap:12px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+}
+.cleanup-body{ flex:1; min-width:0; }
+.cleanup-name{ font-size:14px; color:var(--text); }
+.cleanup-meta{ font-size:12px; color:var(--muted2); margin-top:3px; }
+
+.toggles{
+  display:flex;
+  gap:12px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:#111;
+}
+.toggle input{ display:none; }
+.check{
+  width:14px; height:14px;
+  border-radius:2px;
+  border:1px solid #111;
+  background:#fff;
+  position:relative;
+}
+.toggle input:checked + .check{
+  background:var(--blue);
+  border-color:var(--blue);
+}
+.toggle input:checked + .check::after{
+  content:"";
+  position:absolute;
+  left:3px; top:1px;
+  width:6px; height:9px;
+  border-right:2px solid #fff;
+  border-bottom:2px solid #fff;
+  transform:rotate(45deg);
+}
+
+/* Primary button 이미 common.css에 btn-primary가 있다면 이건 생략 가능 */
+.btn-primary.w-full{ margin-top:14px; }

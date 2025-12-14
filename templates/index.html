@@ -1,59 +1,134 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}WeatherStyle{% endblock %}</title>
+{% extends "base.html" %}
+{% block title %}홈{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-  {% block head %}{% endblock %}
-</head>
+{% block topbar %}
+<div class="topbar__left">
+  <button class="icon-btn" type="button" aria-label="메뉴">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+</div>
+<div class="topbar__title">홈</div>
+<div class="topbar__right"></div>
+{% endblock %}
 
-<body>
-  {# 현재 엔드포인트로 active 처리 #}
-  {% set ep = request.endpoint %}
+{% block content %}
 
-  <!-- ✅ 상단 흰바 + 햄버거: 모든 페이지 공통 -->
-  <header class="topbar">
-    <div class="bar-inner">
-      <button class="icon-btn" aria-label="메뉴">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
+<div class="h1">오늘의 날씨</div>
 
-      <h1 class="topbar-title">{{ page_title or "WeatherStyle" }}</h1>
+<div class="row loc">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+    <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"
+      stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M12 10.5a2.5 2.5 0 1 0-2.5-2.5A2.5 2.5 0 0 0 12 10.5z"
+      stroke="var(--blue)" stroke-width="2"/>
+  </svg>
+  <div class="loc-txt">{{ data.location }}</div>
+</div>
 
-      <!-- 오른쪽 공간 맞추기용 -->
-      <div class="topbar-spacer"></div>
+<!-- 메인 날씨 카드 -->
+<section class="card weather">
+  <div class="w-icon">
+    <!-- 아이콘(예시: 맑음) -->
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+      <path d="M12 18a6 6 0 1 0-6-6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <path d="M12 3v2M12 19v2M4.22 4.22l1.4 1.4M18.38 18.38l1.4 1.4M3 12h2M19 12h2M4.22 19.78l1.4-1.4M18.38 5.62l1.4-1.4"
+        stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="w-temp">{{ data.now.temp }}°C</div>
+  <div class="w-sub">체감온도 {{ data.now.feels }}°C</div>
+  <div class="w-sub">{{ data.now.desc }}</div>
+
+  <div class="metrics">
+    <div class="m">
+      <div class="m-label">습도</div>
+      <div class="m-val">{{ data.now.humidity }}%</div>
     </div>
-  </header>
+    <div class="m">
+      <div class="m-label">바람</div>
+      <div class="m-val">{{ data.now.wind }}m/s</div>
+    </div>
+    <div class="m">
+      <div class="m-label">강수확률</div>
+      <div class="m-val">{{ data.now.pop }}%</div>
+    </div>
+    <div class="m">
+      <div class="m-label">자외선</div>
+      <div class="m-val">{{ data.now.uv }}</div>
+    </div>
+  </div>
+</section>
 
-  <!-- ✅ 페이지별 내용만 바뀌는 영역 -->
-  <main class="page-content">
-    {% block content %}{% endblock %}
-  </main>
+<!-- 대기질 정보 -->
+<section class="card air">
+  <div class="air-title">대기질 정보</div>
 
-  <!-- ✅ 하단바: 모든 페이지 공통 + 아이콘 이동 가능 -->
-  <nav class="bottom-nav" aria-label="하단 메뉴">
-    <a class="nav-item {{ 'active' if ep=='mypage' else '' }}" href="{{ url_for('mypage') }}">
-      <span class="nav-ico {{ 'primary' if ep=='mypage' else 'gray' }}"></span>
-      <span class="nav-text">프로필</span>
-    </a>
+  <div class="air-badges">
+    <div class="badge white">
+      <div class="b-k">미세먼지</div>
+      <div class="b-v">{{ data.air.pm10 }}</div>
+    </div>
+    <div class="badge white">
+      <div class="b-k">초미세먼지</div>
+      <div class="b-v">{{ data.air.pm25 }}</div>
+    </div>
+  </div>
 
-    <a class="nav-item {{ 'active' if ep=='coordination' else '' }}" href="{{ url_for('coordination') }}">
-      <span class="nav-ico {{ 'primary' if ep=='coordination' else 'gray' }}"></span>
-      <span class="nav-text">코디</span>
-    </a>
+  <div class="callout white">
+    <div class="call-ico">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2v20" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M5 9h14" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="call-txt">{{ data.air.message }}</div>
+  </div>
+</section>
 
-    <a class="nav-item {{ 'active' if ep=='closet' else '' }}" href="{{ url_for('closet') }}">
-      <span class="nav-ico {{ 'primary' if ep=='closet' else 'gray' }}"></span>
-      <span class="nav-text">옷장</span>
-    </a>
-  </nav>
+<!-- 내일 미리보기 -->
+<div class="section-title">내일 미리보기</div>
+<section class="card tomorrow white">
+  <div class="t-left">
+    <div class="t-ico">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M7 14a5 5 0 0 1 10 0" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="t-meta">
+      <div class="t-temp">{{ data.tomorrow.max }}°C / {{ data.tomorrow.min }}°C</div>
+      <div class="t-desc">{{ data.tomorrow.desc }}</div>
+    </div>
+  </div>
+  <div class="t-right">
+    <div class="t-k">강수확률</div>
+    <div class="t-v">{{ data.tomorrow.pop }}%</div>
+  </div>
+</section>
 
-  {% block scripts %}
-    <script defer src="{{ url_for('static', filename='js/index.js') }}"></script>
-  {% endblock %}
-</body>
-</html>
+<!-- 코디 힌트 -->
+<section class="hintcard white">
+  <div class="hint-ico">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M12 3l7 4v6c0 5-7 8-7 8s-7-3-7-8V7l7-4z"
+        stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="hint-txt">{{ data.style_hint|safe }}</div>
+</section>
+
+<!-- CTA -->
+<a class="cta" href="{{ url_for('coordination') }}">
+  오늘 뭐 입을지 보기
+</a>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}
