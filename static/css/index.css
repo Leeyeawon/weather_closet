@@ -1,125 +1,396 @@
-.loc{ margin:0 0 12px; }
-.loc-txt{ font-size:14px; color:var(--muted); }
-
-.weather{ padding:18px 16px; }
-.w-icon{
-  width:80px; height:80px;
-  border-radius:999px;
-  background:var(--blue);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:0 auto 10px;
+/* 상단 */
+.topbar{
+  width: 375px;
+  height: 60px;
+  left: 0px;
+  top: 0px;
+  position: absolute;
+  background: white;
 }
-.w-temp{
-  text-align:center;
-  font-size:30px;
-  color:var(--text);
-  margin:4px 0;
+.top-title{
+  left: 147px;
+  top: 18px;
+  position: absolute;
+  text-align: center;
+  color: black;
+  font-size: 18px;
+  font-weight: 400;
+  word-wrap: break-word;
 }
-.w-sub{
-  text-align:center;
-  font-size:14px;
-  color:var(--muted);
-  margin:2px 0;
+.icon-hamburger{
+  width: 17.5px;
+  height: 20px;
+  left: 20px;
+  top: 20px;
+  position: absolute;
+  background: rgba(0, 0, 0, 0);
+  overflow: hidden;
 }
-
-.metrics{
-  margin-top:14px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.m{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; }
-.m-label{ font-size:14px; color:var(--muted2); }
-.m-val{ font-size:14px; color:var(--text); margin-top:4px; }
-
-.air{ margin-top:14px; }
-.air-title{ font-size:16px; color:var(--text); margin-bottom:10px; }
-
-.air-badges{
-  display:flex;
-  gap:10px;
-}
-.badge{
-  flex:1;
-  border-radius:10px;
-  padding:10px 12px;
-  border:1px solid var(--line);
-  background:#fff;
-}
-.badge .b-k{ font-size:10px; color:var(--muted2); }
-.badge .b-v{ font-size:12px; color:var(--text); margin-top:2px; }
-
-.callout{
-  margin-top:12px;
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  background:#fff;
-}
-.call-ico{
-  width:24px; height:24px;
-  display:flex; align-items:center; justify-content:center;
-}
-.call-txt{
-  font-size:14px;
-  color:#262626;
-  line-height:20px;
+.icon-hamburger-bar{
+  width: 17.5px;
+  height: 15px;
+  left: 0px;
+  top: 2.5px;
+  position: absolute;
+  background: #404040;
+  border-radius: 2px;
 }
 
-.section-title{
-  margin:16px 0 10px;
-  font-size:18px;
-  color:var(--text);
-  line-height:28px;
+/* 헤더/로케이션 */
+.h1{
+  left: 130px;
+  top: 80px;
+  position: absolute;
+  color: #171717;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  word-wrap: break-word;
+}
+.location{
+  left: 38px;
+  top: 130px;
+  position: absolute;
+  text-align: center;
+  color: #525252;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  word-wrap: break-word;
+}
+.icon-location{
+  width: 10.5px;
+  height: 14px;
+  left: 21px;
+  top: 133px;
+  position: absolute;
+  background: rgba(0, 0, 0, 0);
+}
+.icon-location-shape{
+  width: 10.5px;
+  height: 13.96px;
+  left: 0px;
+  top: 0px;
+  position: absolute;
+  background: #0075FF;
+  border-radius: 3px;
 }
 
-.tomorrow{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
+/* 카드 공통 */
+.card{
+  position: absolute;
+  background: #FAFAFA;
+  border-radius: 8px;
 }
-.t-left{ display:flex; align-items:center; gap:12px; }
-.t-ico{
-  width:48px; height:48px;
-  border-radius:999px;
-  background:#A3A3A3;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.t-temp{ font-size:16px; color:var(--text); }
-.t-desc{ font-size:14px; color:var(--muted); margin-top:2px; }
-.t-right{ text-align:right; }
-.t-k{ font-size:14px; color:var(--muted); }
-.t-v{ font-size:16px; color:var(--text); margin-top:2px; }
+.card-weather{ width: 335px; height: 372px; left: 20px; top: 159px; }
+.card-air{ width: 335px; height: 95px; left: 20px; top: 551px; }
+.card-tomorrow{ width: 335px; height: 88px; left: 20px; top: 802px; }
+.card-outfit{ width: 335px; height: 72px; left: 20px; top: 905px; }
 
-.hintcard{
-  margin-top:12px;
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  padding:14px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:#fff;
+/* 날씨 메인 */
+.weather-circle{
+  width: 80px;
+  height: 80px;
+  left: 148px;
+  top: 179px;
+  position: absolute;
+  background: #0075FF;
+  border-radius: 9999px;
 }
-.hint-ico{ width:24px; height:24px; margin-top:2px; }
-.hint-txt{ font-size:14px; color:#404040; line-height:20px; }
+.weather-circle-icon{
+  width: 30px;
+  height: 24px;
+  left: 25px;
+  top: 28px;
+  position: absolute;
+  background: rgba(0,0,0,0);
+}
+.weather-circle-icon-shape{
+  width: 30px;
+  height: 24px;
+  left: 0px;
+  top: 0px;
+  position: absolute;
+  background: white;
+  border-radius: 6px;
+}
+.temp{
+  left: 156px;
+  top: 264px;
+  position: absolute;
+  text-align: center;
+  color: #171717;
+  font-size: 30px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.feels{
+  left: 150px;
+  top: 315px;
+  position: absolute;
+  text-align: center;
+  color: #525252;
+  font-size: 14px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.cond{
+  left: 175px;
+  top: 342px;
+  position: absolute;
+  text-align: center;
+  color: #525252;
+  font-size: 14px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
 
+/* 스탯 공통 */
+.stat-label{
+  position: absolute;
+  color: #737373;
+  font-size: 14px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.stat-value{
+  position: absolute;
+  color: #171717;
+  font-size: 14px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.stat-icon{
+  position: absolute;
+  background: rgba(0,0,0,0);
+}
+.stat-icon-shape{
+  width: 100%;
+  height: 100%;
+  left: 0px;
+  top: 0px;
+  position: absolute;
+  background: #A3A3A3;
+  border-radius: 3px;
+}
+
+/* 습도 */
+.stat-hum-label{ left: 100px; top: 409px; }
+.stat-hum-value{ left: 100px; top: 431px; }
+.stat-hum-icon{ width: 12px; height: 16px; left: 80px; top: 410px; }
+
+/* 강수확률 */
+.stat-pop-label{ left: 100px; top: 473px; }
+.stat-pop-value{ left: 100px; top: 495px; }
+.stat-pop-icon{ width: 16px; height: 16px; left: 78px; top: 474px; }
+
+/* 바람 */
+.stat-wind-label{ left: 252px; top: 409px; }
+.stat-wind-value{ left: 252px; top: 431px; }
+.stat-wind-icon{ width: 16px; height: 16px; left: 228px; top: 410px; }
+
+/* 자외선 */
+.stat-uv-label{ left: 252px; top: 473px; }
+.stat-uv-value{ left: 252px; top: 495px; }
+.stat-uv-icon{ width: 16px; height: 16px; left: 228px; top: 474px; }
+
+/* 대기질 */
+.air-title{
+  left: 38px;
+  top: 566px;
+  position: absolute;
+  color: #171717;
+  font-size: 16px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.air-box{
+  position: absolute;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #E5E5E5;
+}
+.air-pm10-box{ width: 145px; height: 39px; left: 38px; top: 593px; }
+.air-pm25-box{ width: 145px; height: 39px; left: 192px; top: 593px; }
+
+.air-label{
+  position: absolute;
+  color: #737373;
+  font-size: 10px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.air-value{
+  position: absolute;
+  color: #171717;
+  font-size: 12px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.air-pm10-label{ left: 53px; top: 606px; }
+.air-pm10-value{ left: 115px; top: 605px; }
+.air-pm25-label{ left: 207px; top: 606px; }
+.air-pm25-value{ left: 278px; top: 605px; }
+
+.air-tip-box{
+  width: 335px;
+  height: 59px;
+  left: 20px;
+  top: 666px;
+  position: absolute;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #E5E5E5;
+}
+.air-tip-icon{
+  width: 16px;
+  height: 16px;
+  left: 37px;
+  top: 688px;
+  position: absolute;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+.air-tip-icon-shape{
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  background: #0075FF;
+  border-radius: 4px;
+}
+.air-tip-text{
+  width: 265px;
+  left: 71px;
+  top: 675px;
+  position: absolute;
+  color: #262626;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  word-wrap: break-word;
+}
+
+/* 내일 미리보기 */
+.tomorrow-title{
+  left: 20px;
+  top: 759px;
+  position: absolute;
+  color: #171717;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 28px;
+  word-wrap: break-word;
+}
+.tomorrow-circle{
+  width: 48px;
+  height: 48px;
+  left: 40px;
+  top: 822px;
+  position: absolute;
+  background: #A3A3A3;
+  border-radius: 9999px;
+}
+.tomorrow-circle-icon{
+  width: 20px;
+  height: 16px;
+  left: 14px;
+  top: 16px;
+  position: absolute;
+  background: rgba(0,0,0,0);
+}
+.tomorrow-circle-icon-shape{
+  width: 20px;
+  height: 14px;
+  left: 0px;
+  top: 1px;
+  position: absolute;
+  background: white;
+  border-radius: 6px;
+}
+.tomorrow-temp{
+  left: 100px;
+  top: 826px;
+  position: absolute;
+  color: #171717;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: Inter, "Noto Sans KR", system-ui, sans-serif;
+  word-wrap: break-word;
+}
+.tomorrow-cond{
+  left: 100px;
+  top: 848px;
+  position: absolute;
+  color: #525252;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Inter, "Noto Sans KR", system-ui, sans-serif;
+  word-wrap: break-word;
+}
+.tomorrow-pop-label{
+  left: 286px;
+  top: 828px;
+  position: absolute;
+  color: #525252;
+  font-size: 14px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+.tomorrow-pop-value{
+  left: 305px;
+  top: 849px;
+  position: absolute;
+  color: #171717;
+  font-size: 16px;
+  font-weight: 400;
+  word-wrap: break-word;
+}
+
+/* 코디 추천 문구 */
+.outfit-icon{
+  width: 20px;
+  height: 16px;
+  left: 43px;
+  top: 933px;
+  position: absolute;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+.outfit-icon-shape{
+  width: 20px;
+  height: 16px;
+  position: absolute;
+  background: #0075FF;
+  border-radius: 4px;
+}
+.outfit-text{
+  left: 77px;
+  top: 921px;
+  position: absolute;
+  color: #404040;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  word-wrap: break-word;
+}
+
+/* CTA 버튼 */
 .cta{
-  margin-top:16px;
-  display:block;
-  text-align:center;
-  padding:18px 14px;
-  border-radius:12px;
-  background:#000;
-  color:#fff;
-  text-decoration:none;
-  font-size:16px;
+  width: 335px;
+  height: 62px;
+  left: 20px;
+  top: 1002px;
+  position: absolute;
+  background: black;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+
+  text-align: center;
+  color: white;
+  font-size: 16px;
+  font-weight: 400;
 }
+.cta:active{ transform: scale(0.99); }

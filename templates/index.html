@@ -1,132 +1,118 @@
 {% extends "base.html" %}
+
 {% block title %}홈{% endblock %}
+
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 {% endblock %}
 
-{% block topbar %}
-<div class="topbar__left">
-  <button class="icon-btn" type="button" aria-label="메뉴">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  </button>
-</div>
-<div class="topbar__title">홈</div>
-<div class="topbar__right"></div>
-{% endblock %}
-
 {% block content %}
+  <!-- top bar -->
+  <div class="topbar"></div>
+  <div class="top-title">마이페이지</div>
 
-<div class="h1">오늘의 날씨</div>
-
-<div class="row loc">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-    <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"
-      stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M12 10.5a2.5 2.5 0 1 0-2.5-2.5A2.5 2.5 0 0 0 12 10.5z"
-      stroke="var(--blue)" stroke-width="2"/>
-  </svg>
-  <div class="loc-txt">{{ data.location }}</div>
-</div>
-
-<!-- 메인 날씨 카드 -->
-<section class="card weather">
-  <div class="w-icon">
-    <!-- 아이콘(예시: 맑음) -->
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-      <path d="M12 18a6 6 0 1 0-6-6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-      <path d="M12 3v2M12 19v2M4.22 4.22l1.4 1.4M18.38 18.38l1.4 1.4M3 12h2M19 12h2M4.22 19.78l1.4-1.4M18.38 5.62l1.4-1.4"
-        stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-    </svg>
+  <!-- hamburger (placeholder) -->
+  <div class="icon-hamburger" aria-hidden="true">
+    <div class="icon-hamburger-bar"></div>
   </div>
 
-  <div class="w-temp">{{ data.now.temp }}°C</div>
-  <div class="w-sub">체감온도 {{ data.now.feels }}°C</div>
-  <div class="w-sub">{{ data.now.desc }}</div>
+  <!-- headings -->
+  <div class="h1">오늘의 날씨</div>
 
-  <div class="metrics">
-    <div class="m">
-      <div class="m-label">습도</div>
-      <div class="m-val">{{ data.now.humidity }}%</div>
-    </div>
-    <div class="m">
-      <div class="m-label">바람</div>
-      <div class="m-val">{{ data.now.wind }}m/s</div>
-    </div>
-    <div class="m">
-      <div class="m-label">강수확률</div>
-      <div class="m-val">{{ data.now.pop }}%</div>
-    </div>
-    <div class="m">
-      <div class="m-label">자외선</div>
-      <div class="m-val">{{ data.now.uv }}</div>
+  <div class="location">
+    <span id="cityText">부산광역시</span>
+  </div>
+  <div class="icon-location" aria-hidden="true">
+    <div class="icon-location-shape"></div>
+  </div>
+
+  <!-- weather card -->
+  <div class="card card-weather"></div>
+
+  <div class="weather-circle" aria-hidden="true">
+    <div class="weather-circle-icon">
+      <img id="weatherIcon" class="weather-icon" src="{{ url_for('static', filename='img/icons/sun.png') }}" alt="">
     </div>
   </div>
-</section>
 
-<!-- 대기질 정보 -->
-<section class="card air">
+  <div class="temp" id="tempText">12°C</div>
+  <div class="feels" id="feelsText">체감온도 9°C</div>
+  <div class="cond" id="condText">맑음</div>
+
+  <!-- stats -->
+  <div class="stat-label stat-hum-label">습도</div>
+  <div class="stat-value stat-hum-value" id="humText">65%</div>
+  <div class="stat-icon stat-hum-icon" aria-hidden="true">
+    <div class="stat-icon-shape"></div>
+  </div>
+
+  <div class="stat-label stat-pop-label">강수확률</div>
+  <div class="stat-value stat-pop-value" id="popText">20%</div>
+  <div class="stat-icon stat-pop-icon" aria-hidden="true">
+    <div class="stat-icon-shape"></div>
+  </div>
+
+  <div class="stat-label stat-wind-label">바람</div>
+  <div class="stat-value stat-wind-value" id="windText">2.3m/s</div>
+  <div class="stat-icon stat-wind-icon" aria-hidden="true">
+    <div class="stat-icon-shape"></div>
+  </div>
+
+  <div class="stat-label stat-uv-label">자외선</div>
+  <div class="stat-value stat-uv-value" id="uvText">보통</div>
+  <div class="stat-icon stat-uv-icon" aria-hidden="true">
+    <div class="stat-icon-shape"></div>
+  </div>
+
+  <!-- air quality -->
+  <div class="card card-air"></div>
   <div class="air-title">대기질 정보</div>
 
-  <div class="air-badges">
-    <div class="badge white">
-      <div class="b-k">미세먼지</div>
-      <div class="b-v">{{ data.air.pm10 }}</div>
-    </div>
-    <div class="badge white">
-      <div class="b-k">초미세먼지</div>
-      <div class="b-v">{{ data.air.pm25 }}</div>
+  <div class="air-box air-pm10-box"></div>
+  <div class="air-box air-pm25-box"></div>
+
+  <div class="air-label air-pm10-label">미세먼지</div>
+  <div class="air-value air-pm10-value" id="pm10Text">나쁨</div>
+
+  <div class="air-label air-pm25-label">초미세먼지</div>
+  <div class="air-value air-pm25-value" id="pm25Text">보통</div>
+
+  <div class="air-tip-box"></div>
+  <div class="air-tip-icon" aria-hidden="true">
+    <div class="air-tip-icon-shape"></div>
+  </div>
+  <div class="air-tip-text" id="airTipText">
+    바람이 조금 불어서 체감 온도가 실제 기온보다 낮게 느껴질 수 있어요.
+  </div>
+
+  <!-- tomorrow -->
+  <div class="tomorrow-title">내일 미리보기</div>
+  <div class="card card-tomorrow"></div>
+
+  <div class="tomorrow-circle" aria-hidden="true">
+    <div class="tomorrow-circle-icon">
+      <img id="tomorrowIcon" class="weather-icon"
+          src="{{ url_for('static', filename='img/icons/cloud.png') }}" alt="">
     </div>
   </div>
 
-  <div class="callout white">
-    <div class="call-ico">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2v20" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
-        <path d="M5 9h14" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div class="call-txt">{{ data.air.message }}</div>
-  </div>
-</section>
+  <div class="tomorrow-temp" id="tomorrowTempText">15°C / 8°C</div>
+  <div class="tomorrow-cond" id="tomorrowCondText">흐림</div>
 
-<!-- 내일 미리보기 -->
-<div class="section-title">내일 미리보기</div>
-<section class="card tomorrow white">
-  <div class="t-left">
-    <div class="t-ico">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path d="M7 14a5 5 0 0 1 10 0" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div class="t-meta">
-      <div class="t-temp">{{ data.tomorrow.max }}°C / {{ data.tomorrow.min }}°C</div>
-      <div class="t-desc">{{ data.tomorrow.desc }}</div>
-    </div>
-  </div>
-  <div class="t-right">
-    <div class="t-k">강수확률</div>
-    <div class="t-v">{{ data.tomorrow.pop }}%</div>
-  </div>
-</section>
+  <div class="tomorrow-pop-label">강수확률</div>
+  <div class="tomorrow-pop-value" id="tomorrowPopText">40%</div>
 
-<!-- 코디 힌트 -->
-<section class="hintcard white">
-  <div class="hint-ico">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M12 3l7 4v6c0 5-7 8-7 8s-7-3-7-8V7l7-4z"
-        stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>
-    </svg>
+  <!-- outfit -->
+  <div class="card card-outfit"></div>
+  <div class="outfit-icon" aria-hidden="true">
+    <div class="outfit-icon-shape"></div>
   </div>
-  <div class="hint-txt">{{ data.style_hint|safe }}</div>
-</section>
+  <div class="outfit-text" id="outfitText">
+    체감 기온 9℃ 기준, 가벼운 코트나 두꺼운 <br/>니트가 어울리는 날이에요.
+  </div>
 
-<!-- CTA -->
-<a class="cta" href="{{ url_for('coordination') }}">
-  오늘 뭐 입을지 보기
-</a>
-
+  <!-- CTA -->
+  <button class="cta" id="ctaBtn" type="button">오늘 뭐 입을지 보기</button>
 {% endblock %}
 
 {% block scripts %}

@@ -1,151 +1,405 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify
+import os
+import requests
+import hashlib
+from datetime import datetime, timedelta, timezone
 
+# =========================
+# timezone (Windows tzdata 이슈 fallback)
+# =========================
+try:
+    from zoneinfo import ZoneInfo
+    KST = ZoneInfo("Asia/Seoul")
+except Exception:
+    KST = timezone(timedelta(hours=9))  # tzdata 없으면 KST 고정(+09:00)
+
+# =========================
+# Flask
+# =========================
 app = Flask(__name__)
-app.secret_key = "dev-secret"  # 데모용 (배포 시 환경변수로)
 
-@app.route("/")
+# =========================
+# 환경 변수
+# =========================
+KMA_SERVICE_KEY = os.getenv("KMA_SERVICE_KEY", "").strip()
+DEFAULT_NX = int(os.getenv("DEFAULT_NX", "98"))
+DEFAULT_NY = int(os.getenv("DEFAULT_NY", "76"))
+HTTP_TIMEOUT = float(os.getenv("HTTP_TIMEOUT", "7"))
+
+# =========================
+# 기상청 API
+# =========================
+BASE = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0"
+ULTRA_NCST_URL = f"{BASE}/getUltraSrtNcst"
+VILAGE_FCST_URL = f"{BASE}/getVilageFcst"
+VILAGE_BASE_TIMES = [2, 5, 8, 11, 14, 17, 20, 23]
+
+# =========================
+# 캐시(과호출 방지)
+# =========================
+_CACHE = {}
+CACHE_TTL = timedelta(minutes=3)
+
+# =========================
+# 내부 유틸
+# =========================
+def _call(url: str, params: dict) -> dict:
+    if not KMA_SERVICE_KEY:
+        return {"ok": False, "error": "KMA_SERVICE_KEY(서비스키)가 설정되지 않았어요."}
+
+    base_params = {
+        "serviceKey": KMA_SERVICE_KEY,
+        "pageNo": 1,
+        "numOfRows": 1000,
+        "dataType": "JSON",
+    }
+
+    try:
+        r = requests.get(url, params={**base_params, **params}, timeout=HTTP_TIMEOUT)
+        r.raise_for_status()
+        data = r.json()
+
+        header = data.get("response", {}).get("header", {})
+        if header.get("resultCode") != "00":
+            return {"ok": False, "error": header.get("resultMsg", "API 오류"), "raw": data}
+
+        items = (
+            data.get("response", {})
+                .get("body", {})
+                .get("items", {})
+                .get("item", [])
+        )
+        return {"ok": True, "items": items}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+def _pick_vilage_base(dt: datetime) -> tuple[str, str]:
+    t = dt.astimezone(KST) - timedelta(minutes=10)
+    hour = t.hour
+    candidates = [h for h in VILAGE_BASE_TIMES if h <= hour]
+    if candidates:
+        h = max(candidates)
+        return t.strftime("%Y%m%d"), f"{h:02d}00"
+    prev = t - timedelta(days=1)
+    return prev.strftime("%Y%m%d"), "2300"
+
+def _parse_latest(items: list[dict]) -> dict:
+    out = {}
+    for it in items:
+        cat = it.get("category")
+        val = it.get("obsrValue") or it.get("fcstValue")
+        if cat is not None:
+            out[cat] = val
+    return out
+
+def get_ultra_now(nx: int, ny: int) -> dict:
+    now = datetime.now(KST)
+
+    base_date = now.strftime("%Y%m%d")
+    base_time = f"{now.hour:02d}00"
+    res = _call(ULTRA_NCST_URL, {"base_date": base_date, "base_time": base_time, "nx": nx, "ny": ny})
+    if res.get("ok") and res.get("items"):
+        return {"ok": True, "base_date": base_date, "base_time": base_time, "data": _parse_latest(res["items"])}
+
+    back = now - timedelta(hours=1)
+    base_date = back.strftime("%Y%m%d")
+    base_time = f"{back.hour:02d}00"
+    res2 = _call(ULTRA_NCST_URL, {"base_date": base_date, "base_time": base_time, "nx": nx, "ny": ny})
+    if res2.get("ok") and res2.get("items"):
+        return {"ok": True, "base_date": base_date, "base_time": base_time, "data": _parse_latest(res2["items"])}
+
+    return {"ok": False, "error": res.get("error") or res2.get("error") or "초단기실황 데이터가 비어있어요."}
+
+def get_vilage_forecast(nx: int, ny: int) -> dict:
+    base_date, base_time = _pick_vilage_base(datetime.now(KST))
+    res = _call(VILAGE_FCST_URL, {"base_date": base_date, "base_time": base_time, "nx": nx, "ny": ny})
+    if not res.get("ok"):
+        return {"ok": False, "error": res.get("error")}
+    return {"ok": True, "base_date": base_date, "base_time": base_time, "items": res.get("items", [])}
+
+# =========================
+# 체감온도 계산 + 코디 문장
+# =========================
+OUTFIT_MESSAGES = {
+    "v_cold": [
+        "체감 기온이 많이 낮아요.\n롱패딩 + 목도리 + 장갑까지 챙기면 좋아요.",
+        "칼바람 체감이에요.\n두꺼운 아우터 + 기모 이너로 보온 우선!",
+        "한파 느낌이에요.\n패딩/코트에 귀마개나 넥워머 추천해요.",
+        "아주 춥게 느껴질 수 있어요.\n내복/히트텍 같은 레이어드가 좋아요.",
+    ],
+    "cold": [
+        "체감이 쌀쌀해요.\n가벼운 코트나 두꺼운 니트가 좋아요.",
+        "바람 때문에 더 춥게 느껴질 수 있어요.\n자켓 + 머플러 추천!",
+        "외투는 필수!\n코트/점퍼에 따뜻한 이너로 마무리해요.",
+        "손발이 쉽게 차가워질 날씨예요.\n양말/기모 바지 추천해요.",
+    ],
+    "cool": [
+        "선선한 체감이에요.\n가디건/자켓 한 겹 챙기면 딱 좋아요.",
+        "아침저녁으로 쌀쌀할 수 있어요.\n얇은 아우터 추천!",
+        "니트나 맨투맨에 가벼운 겉옷이면 충분해요.",
+        "레이어드하기 좋은 날!\n셔츠 + 니트 조합 추천해요.",
+    ],
+    "mild": [
+        "적당히 포근한 체감이에요.\n긴팔 + 얇은 겉옷이면 좋아요.",
+        "활동하기 좋은 날씨!\n가벼운 자켓/셔츠 코디 추천해요.",
+        "낮엔 따뜻할 수 있어요.\n겉옷은 탈착 가능한 걸로!",
+        "편하게 입기 좋아요.\n맨투맨/셔츠 + 면바지 조합 추천!",
+    ],
+    "warm": [
+        "따뜻한 편이에요.\n얇은 긴팔이나 가벼운 셔츠가 좋아요.",
+        "살짝 더울 수 있어요.\n통풍 잘 되는 소재 추천해요.",
+        "가벼운 반팔+얇은 겉옷(실내 대비) 조합 좋아요.",
+        "활동량 많으면 땀이 날 수도!\n얇고 가벼운 옷 추천해요.",
+    ],
+    "hot": [
+        "덥게 느껴질 수 있어요.\n반팔/얇은 소재로 시원하게!",
+        "햇볕이 강할 수 있어요.\n모자/선크림 챙기면 좋아요.",
+        "땀나기 쉬운 날씨예요.\n린넨/쿨링 소재 추천!",
+        "실내외 온도차 대비해 얇은 가디건 하나면 좋아요.",
+    ],
+    "v_hot": [
+        "체감이 매우 더워요.\n통풍 좋은 반팔/반바지 + 수분 보충!",
+        "폭염 느낌이에요.\n밝은 색, 얇은 소재로 가볍게 입어요.",
+        "자외선/열기 주의!\n모자 + 선크림 + 양산도 추천해요.",
+        "땀이 많이 날 수 있어요.\n여분 티셔츠나 데오드란트도 좋아요.",
+    ],
+}
+
+def _safe_float(x):
+    try:
+        return float(x)
+    except Exception:
+        return None
+
+def calc_feels_c(temp_c, wind_ms, rh):
+    if temp_c is None:
+        return None
+    wind_ms = wind_ms or 0.0
+
+    if temp_c <= 10 and wind_ms > 1.3:
+        v_kmh = wind_ms * 3.6
+        return 13.12 + 0.6215 * temp_c - 11.37 * (v_kmh ** 0.16) + 0.3965 * temp_c * (v_kmh ** 0.16)
+
+    if temp_c >= 27 and rh is not None:
+        T = temp_c * 9/5 + 32
+        R = rh
+        HI = (-42.379 + 2.04901523*T + 10.14333127*R - 0.22475541*T*R
+              - 0.00683783*T*T - 0.05481717*R*R + 0.00122874*T*T*R
+              + 0.00085282*T*R*R - 0.00000199*T*T*R*R)
+        return (HI - 32) * 5/9
+
+    return temp_c
+
+def band_key(feels_c):
+    if feels_c is None:
+        return "mild"
+    if feels_c < -5: return "v_cold"
+    if feels_c < 2:  return "cold"
+    if feels_c < 10: return "cool"
+    if feels_c < 18: return "mild"
+    if feels_c < 24: return "warm"
+    if feels_c < 28: return "hot"
+    return "v_hot"
+
+def pick_daily_message(band, date_yyyymmdd):
+    msgs = OUTFIT_MESSAGES.get(band, OUTFIT_MESSAGES["mild"])
+    seed = f"{date_yyyymmdd}:{band}".encode("utf-8")
+    idx = int(hashlib.sha256(seed).hexdigest(), 16) % len(msgs)
+    return msgs[idx]
+
+# =========================
+# forecast에서 값 뽑기 + 상태/아이콘 매핑
+# =========================
+def _fcst_get(items, fcst_date: str, fcst_time: str, category: str):
+    for it in items:
+        if it.get("fcstDate") == fcst_date and it.get("fcstTime") == fcst_time and it.get("category") == category:
+            return it.get("fcstValue")
+    return None
+
+def _weather_text_icon(pty, sky):
+    if pty in ("1", "4", "5"):
+        return ("비", "rain")
+    if pty in ("2", "6"):
+        return ("비/눈", "sleet")
+    if pty in ("3", "7"):
+        return ("눈", "snow")
+
+    if sky == "1":
+        return ("맑음", "sun")
+    if sky == "3":
+        return ("구름많음", "cloud")
+    if sky == "4":
+        return ("흐림", "overcast")
+
+    return ("-", "unknown")
+
+def _round_to_hour(dt: datetime):
+    return dt.replace(minute=0, second=0, microsecond=0)
+
+# =========================
+# air tip (기온/바람/습도 기반)
+# =========================
+AIR_TIPS = {
+    "windy": [
+        "바람이 강해서 체감 온도가 실제 기온보다 낮게 느껴질 수 있어요.",
+        "바람이 세요. 겉옷은 바람막이 계열이 좋아요.",
+        "바람이 불어 체감이 더 쌀쌀할 수 있어요. 목/손 보온 추천!",
+    ],
+    "humid_hot": [
+        "습도가 높아서 더 덥고 답답하게 느껴질 수 있어요.",
+        "후텁지근할 수 있어요. 통풍 잘 되는 소재가 좋아요.",
+        "땀이 마르기 어려운 날! 여벌 티/손수건 챙기면 좋아요.",
+    ],
+    "dry": [
+        "공기가 건조할 수 있어요. 립밤/핸드크림 챙기면 좋아요.",
+        "건조해서 피부가 당길 수 있어요. 보습에 신경 써줘요.",
+        "건조한 날씨예요. 따뜻한 물 자주 마시기 추천!",
+    ],
+    "nice": [
+        "활동하기 좋은 컨디션이에요. 가볍게 산책해도 좋아요!",
+        "전반적으로 무난한 날씨예요. 겉옷은 선택적으로!",
+        "컨디션 괜찮아요. 실내외 온도차만 조심해요.",
+    ],
+}
+
+def pick_tip_daily(key: str, date_yyyymmdd: str):
+    msgs = AIR_TIPS.get(key, AIR_TIPS["nice"])
+    seed = f"tip:{date_yyyymmdd}:{key}".encode("utf-8")
+    idx = int(hashlib.sha256(seed).hexdigest(), 16) % len(msgs)
+    return msgs[idx]
+
+def make_air_tip(temp_c, wind_ms, rh, date_yyyymmdd):
+    if wind_ms is not None and wind_ms >= 5.0:
+        return pick_tip_daily("windy", date_yyyymmdd)
+    if temp_c is not None and temp_c >= 25 and rh is not None and rh >= 70:
+        return pick_tip_daily("humid_hot", date_yyyymmdd)
+    if rh is not None and rh <= 35:
+        return pick_tip_daily("dry", date_yyyymmdd)
+    return pick_tip_daily("nice", date_yyyymmdd)
+
+# =========================
+# 페이지 라우트
+# =========================
+@app.get("/")
 def index():
-    data = {
-        "location": "서울특별시 강남구",
-        "now": {
-            "temp": 12,
-            "feels": 9,
-            "desc": "맑음",
-            "humidity": 65,
-            "pop": 20,
-            "wind": 2.3,
-            "uv": "보통",
-        },
-        "air": {
-            "pm10": "나쁨",
-            "pm25": "보통",
-            "message": "바람이 조금 불어서 체감 온도가 실제 기온보다 낮게 느껴질 수 있어요."
-        },
-        "tomorrow": {
-            "max": 15,
-            "min": 8,
-            "desc": "흐림",
-            "pop": 40,
-        },
-        "style_hint": '체감 기온 9℃ 기준, 가벼운 코트나 두꺼운 <br/>니트가 어울리는 날이에요.'
-    }
-    return render_template("index.html", data=data, active="home")
+    return render_template("index.html", active_page="home")
 
-@app.route("/coordination")
+@app.get("/coordination")
 def coordination():
-    data = {
-        "location": "서울 강남구",
-        "date": "2025.12.10 (수)",
-        "temp": 8,
-        "feels_like": 5,
-        "humidity": 65,
-        "wind": "2.5m/s",
-        "rain_prob": 10,
-        "pm10": "나쁨",
-        "pm25": "보통",
-        "uv": "낮음",
-        "item": {
-            "name": "크림 니트",
-            "desc": "오늘 같은 쌀쌀한 날씨에 딱 맞는 따뜻하고 부드러운 니트예요. 심플한 디자인으로 다양한 코디에 활용하기 좋아요.",
-            "img": "https://placehold.co/299x190"
-        },
-        "health_cards": [
-            {"title": "마스크 착용 권장", "desc": "미세먼지가 나쁜 날이에요. 마스크를 꼭 챙겨보세요."},
-            {"title": "자외선 차단", "desc": "오늘은 자외선이 낮지만, 외출 시 선크림을 바르는 것을 추천해요."},
-        ],
-        "prefs": {
-            "avoid": ["민소매", "반바지", "탑"],
-            "style": ["캐주얼", "심플"]
-        },
-        "outfit": {
-            "img": "https://placehold.co/335x256",
-            "top": "크림 니트",
-            "bottom": "흑청 데님",
-            "outer": "숏 패딩",
-            "shoes": "화이트 스니커즈",
+    return render_template("coordination.html", active_page="codi")
+
+@app.get("/closet")
+def closet():
+    return render_template("closet.html", active_page="closet")
+
+@app.get("/mypage")
+def mypage():
+    return render_template("mypage.html", active_page="profile")
+
+# =========================
+# API 라우트
+# =========================
+@app.get("/api/weather")
+def api_weather():
+    nx = int(request.args.get("nx", DEFAULT_NX))
+    ny = int(request.args.get("ny", DEFAULT_NY))
+    key = f"{nx},{ny}"
+
+    now = datetime.now(KST)
+    if key in _CACHE and (now - _CACHE[key]["ts"]) < CACHE_TTL:
+        return jsonify({"ok": True, "cached": True, **_CACHE[key]["data"]})
+
+    nowcast = get_ultra_now(nx, ny)
+    forecast = get_vilage_forecast(nx, ny)
+
+    # nowcast 기본값
+    d = nowcast.get("data", {}) if nowcast.get("ok") else {}
+    temp_c = _safe_float(d.get("T1H"))
+    wind_ms = _safe_float(d.get("WSD"))
+    rh = _safe_float(d.get("REH"))
+
+    # 체감/코디 문구
+    today = now.strftime("%Y%m%d")
+    feels_c = calc_feels_c(temp_c, wind_ms, rh)
+    outfit_text = pick_daily_message(band_key(feels_c), today) if feels_c is not None else "날씨 정보를 불러오는 중이에요."
+
+    # air tip 문구
+    air_tip_text = make_air_tip(temp_c, wind_ms, rh, today)
+
+    # forecast에서 현재 POP/상태, 내일 요약 만들기
+    items = forecast.get("items", []) if forecast.get("ok") else []
+
+    now_pop = None
+    now_cond_text, now_icon = ("-", "unknown")
+    tmr_hi = tmr_low = None
+    tmr_pop = None
+    tmr_cond_text, tmr_icon = ("-", "unknown")
+
+    if items:
+        now_dt = _round_to_hour(now)
+        fcst_date = now_dt.strftime("%Y%m%d")
+        fcst_time = now_dt.strftime("%H00")
+
+        now_pop_v = _fcst_get(items, fcst_date, fcst_time, "POP")
+        now_pop = None if now_pop_v is None else int(float(now_pop_v))
+
+        now_sky = _fcst_get(items, fcst_date, fcst_time, "SKY")
+        now_pty = _fcst_get(items, fcst_date, fcst_time, "PTY")
+        now_cond_text, now_icon = _weather_text_icon(now_pty, now_sky)
+
+        tmr = (now_dt + timedelta(days=1)).strftime("%Y%m%d")
+
+        tmr_tmp_list = []
+        for it in items:
+            if it.get("fcstDate") == tmr and it.get("category") == "TMP":
+                v = _safe_float(it.get("fcstValue"))
+                if v is not None:
+                    tmr_tmp_list.append(v)
+
+        if tmr_tmp_list:
+            tmr_hi = round(max(tmr_tmp_list))
+            tmr_low = round(min(tmr_tmp_list))
+
+        tmr_time = "1200"
+        tmr_pop_v = _fcst_get(items, tmr, tmr_time, "POP")
+        tmr_pop = None if tmr_pop_v is None else int(float(tmr_pop_v))
+
+        tmr_sky = _fcst_get(items, tmr, tmr_time, "SKY")
+        tmr_pty = _fcst_get(items, tmr, tmr_time, "PTY")
+        tmr_cond_text, tmr_icon = _weather_text_icon(tmr_pty, tmr_sky)
+
+    payload = {
+        "nx": nx,
+        "ny": ny,
+
+        # 원본(디버깅/확장용)
+        "nowcast": nowcast,
+        "forecast": forecast,
+
+        # 화면에 바로 꽂을 요약값
+        "now": {
+            "temp": temp_c,
+            "hum": rh,
+            "wind": wind_ms,
+            "pop": now_pop,
+            "cond_text": now_cond_text,
+            "icon": now_icon,
         },
         "tomorrow": {
-            "date": "2025.01.16 (목)",
-            "temp": 5,
-            "diff": "오늘보다 3°C 낮음",
-            "rain_prob": 70,
-            "wind": "3m/s",
-            "uv": "보통",
-            "hint": "내일은 오늘보다 3°C 더 추워요. 오늘보다 한 단계 두꺼운 아우터를 준비해보세요."
-        }
-    }
-    return render_template("coordination.html", data=data, active="coordination")
-
-@app.route("/closet")
-def closet():
-    data = {
-        "insight": "지난 30일 동안, 상의는 주로 니트류를, 바지는 슬랙스를 많이 입었어요.",
-        "favorites": [
-            {
-                "date": "2025.01.15",
-                "summary": "체감온도 8°C · 맑음",
-                "img": "https://placehold.co/73x73"
-            },
-            {
-                "date": "2025.01.12",
-                "summary": "체감온도 12°C · 흐림",
-                "img": "https://placehold.co/73x73"
-            }
-        ],
-        "stats": {
-            "top1": {"name": "크림 롱코트", "category": "아우터", "count": 8, "img": "https://placehold.co/40x40"},
-            "top2": {"name": "베이지 니트", "category": "상의", "count": 6, "img": "https://placehold.co/36x36"},
-            "tip": "이번 달 가장 자주 입은 아우터는 ‘크림 롱코트’예요. 8번 착용했습니다."
+            "hi": tmr_hi,
+            "low": tmr_low,
+            "pop": tmr_pop,
+            "cond_text": tmr_cond_text,
+            "icon": tmr_icon,
         },
-        "unworn60": [
-            {"name": "블랙 조끼", "meta": "아우터 · 2024.10.15", "img": "https://placehold.co/40x40"},
-            {"name": "블랙 부츠", "meta": "신발 · 착용 기록 없음", "img": "https://placehold.co/40x40"},
-            {"name": "레드 운동화", "meta": "신발 · 착용 기록 없음", "img": "https://placehold.co/40x40"},
-        ],
-        "cleanup": [
-            {"name": "화이트 셔츠", "meta": "상의 · 2024.06.20", "img": "https://placehold.co/48x48", "pick": "discard"},
-            {"name": "그레이 카디건", "meta": "상의 · 2024.06.20", "img": "https://placehold.co/48x48", "pick": "donate"},
-            {"name": "레드 운동화", "meta": "신발 · 착용 기록 없음", "img": "https://placehold.co/48x48", "pick": "discard"},
-        ]
-    }
-    return render_template("closet.html", data=data)
 
-@app.route("/mypage")
-def mypage():
-    data = {
-        "user": {
-            "name": "이예원",
-            "avatar": "https://placehold.co/48x48",
-            "temp_tag": "#추위 민감",
-            "styles": ["#포멀", "#러블리"],
-            "avoid": ["#민소매", "#반바지", "#탑"],
-        },
-        "avoid_manage": ["민소매", "반바지", "탑"],
-        "sliders": {
-            "casual_formal": 70,
-            "simple_lovely": 55,
-        },
-        "health": [
-            {"label": "비염", "checked": False},
-            {"label": "햇빛 알레르기", "checked": True},
-            {"label": "아토피/피부 민감", "checked": False},
-            {"label": "기압 변화에 따른 두통", "checked": False},
-        ],
-        "aids": [
-            {"label": "마스크", "checked": False},
-            {"label": "양산", "checked": True},
-            {"label": "모자", "checked": True},
-            {"label": "레인부츠", "checked": False},
-            {"label": "우비", "checked": True},
-        ],
-        "notify": [
-            {"label": '아침에 "오늘의 아이템" 알림', "checked": True},
-            {"label": "미세먼지 나쁜 날 마스크 알림", "checked": True},
-            {"label": "자외선 강한 날 양산/모자 알림", "checked": False},
-        ],
+        "feels_c": None if feels_c is None else round(feels_c),
+        "outfit_text": outfit_text,
+        "air_tip_text": air_tip_text,
     }
-    return render_template("mypage.html", data=data)
 
+    _CACHE[key] = {"ts": now, "data": payload}
+    return jsonify({"ok": True, "cached": False, **payload})
 
 if __name__ == "__main__":
     app.run(debug=True)

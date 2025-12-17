@@ -1,165 +1,169 @@
 {% extends "base.html" %}
+
 {% block title %}코디{% endblock %}
+
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/coordination.css') }}">
 {% endblock %}
 
-{% block topbar %}
-<div class="topbar__left">
-  <a class="icon-btn" href="{{ url_for('index') }}" aria-label="홈으로">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </a>
+{% block content %}
+<div class="screen">
+
+  <!-- Top bar -->
+  <div class="topbar"></div>
+  <div class="app-title">StyleFit</div>
+
+  <!-- Location + Date -->
+  <div class="loc-row">
+    <img class="icon-loc" src="{{ url_for('static', filename='img/icons/location.png') }}" alt="">
+    <div class="loc-text" id="cityText">부산광역시</div>
+  </div>
+  <div class="date-text" id="dateText">2025.12.10 (수)</div>
+
+  <!-- Summary box -->
+  <div class="summary-box"></div>
+
+  <div class="now-temp" id="tempText">8°C</div>
+  <div class="now-feels" id="feelsText">체감 5°C</div>
+
+  <div class="mini-stats">
+    <div class="mini-stat">
+      <img class="mini-ico" src="{{ url_for('static', filename='img/icons/humidity.png') }}" alt="">
+      <span id="humText">65%</span>
+    </div>
+    <div class="mini-stat">
+      <img class="mini-ico" src="{{ url_for('static', filename='img/icons/wind.png') }}" alt="">
+      <span id="windText">2.5m/s</span>
+    </div>
+    <div class="mini-stat">
+      <img class="mini-ico" src="{{ url_for('static', filename='img/icons/rain.png') }}" alt="">
+      <span id="popText">10%</span>
+    </div>
+  </div>
+
+  <div class="badge-row">
+    <div class="badge">
+      <div class="badge-label">미세먼지</div>
+      <div class="badge-value" id="pm10Text">나쁨</div>
+    </div>
+    <div class="badge">
+      <div class="badge-label">초미세먼지</div>
+      <div class="badge-value" id="pm25Text">보통</div>
+    </div>
+    <div class="badge">
+      <div class="badge-label">자외선</div>
+      <div class="badge-value" id="uvText">낮음</div>
+    </div>
+  </div>
+
+  <!-- Today recommended item -->
+  <div class="section-title s1">오늘의 추천 아이템</div>
+  <div class="item-card"></div>
+
+  <img class="item-img" id="itemImg" src="https://placehold.co/299x190" alt="">
+  <div class="item-name" id="itemName">크림 니트</div>
+  <div class="item-desc" id="itemDesc">
+    오늘 같은 쌀쌀한 날씨에 딱 맞는 따뜻하고 부드러운 니트예요. 심플한 디자인으로 다양한 코디에 활용하기 좋아요.
+  </div>
+
+  <button class="item-more" id="itemMoreBtn" type="button">
+    <img class="star-ico" src="{{ url_for('static', filename='img/icons/star.png') }}" alt="">
+    다른 아이템 보기
+    <span class="page-indicator" id="itemPageText">1/3</span>
+  </button>
+
+  <!-- Health & support item -->
+  <div class="section-title s2">건강 &amp; 보조 아이템 추천</div>
+
+  <div class="support-card support-1"></div>
+  <div class="support-icon">
+    <img src="{{ url_for('static', filename='img/icons/mask.png') }}" alt="">
+  </div>
+  <div class="support-title" id="supportTitle1">마스크 착용 권장</div>
+  <div class="support-desc" id="supportDesc1">미세먼지가 나쁜 날이에요. 마스크를 꼭 챙겨보세요.</div>
+
+  <div class="support-card support-2"></div>
+  <div class="support2-icon">
+    <img src="{{ url_for('static', filename='img/icons/sunblock.png') }}" alt="">
+  </div>
+  <div class="support2-title" id="supportTitle2">자외선 차단</div>
+  <div class="support2-desc" id="supportDesc2">오늘은 자외선이 낮지만, 외출 시 선크림을 바르는 것을 추천해요.</div>
+
+  <!-- Taste -->
+  <div class="taste-title">나의 취향 설정</div>
+  <div class="taste-edit">
+    <img class="edit-ico" src="{{ url_for('static', filename='img/icons/edit.png') }}" alt="">
+    <span>수정</span>
+  </div>
+
+  <div class="taste-row">
+    <div class="taste-label">회피 아이템</div>
+    <div class="taste-tags" id="avoidTags">
+      <span class="tag">#민소매</span>
+      <span class="tag">#반바지</span>
+      <span class="tag">#탑</span>
+    </div>
+  </div>
+
+  <div class="taste-row t2">
+    <div class="taste-label">스타일</div>
+    <div class="taste-tags" id="styleTags">
+      <span class="tag">#캐주얼</span>
+      <span class="tag">#심플</span>
+    </div>
+  </div>
+
+  <!-- Outfit example -->
+  <div class="section-title s3">오늘의 코디 예시</div>
+  <img class="codi-img" id="codiImg" src="https://placehold.co/335x256" alt="">
+
+  <!-- Outfit composition -->
+  <div class="compose-box"></div>
+  <div class="compose-title">코디 구성</div>
+
+  <div class="compose-line l1"><span class="k">상의:</span> <span class="v" id="topText">크림 니트</span></div>
+  <div class="compose-line l2"><span class="k">하의:</span> <span class="v" id="bottomText">흑청 데님</span></div>
+  <div class="compose-line l3"><span class="k">아우터:</span> <span class="v" id="outerText">숏 패딩</span></div>
+  <div class="compose-line l4"><span class="k">신발:</span> <span class="v" id="shoesText">화이트 스니커즈</span></div>
+
+  <button class="save-btn" id="saveBtn" type="button">
+    <img class="save-star" src="{{ url_for('static', filename='img/icons/star-white.png') }}" alt="">
+    이 코디를 즐겨찾기로 저장하기
+  </button>
+
+  <!-- Tomorrow preview -->
+  <div class="section-title s4">내일 날씨 미리보기</div>
+  <div class="tmr-box"></div>
+
+  <div class="tmr-date" id="tmrDateText">2025.01.16 (목)</div>
+  <div class="tmr-temp" id="tmrTempText">5°C</div>
+
+  <div class="tmr-delta">
+    <img class="delta-ico" src="{{ url_for('static', filename='img/icons/arrow.png') }}" alt="">
+    <span id="tmrDeltaText">오늘보다 3°C 낮음</span>
+  </div>
+
+  <div class="tmr-mini">
+    <img class="mini-ico" src="{{ url_for('static', filename='img/icons/humidity-dark.png') }}" alt="">
+    <span id="tmrHumText">70%</span>
+    <img class="mini-ico" src="{{ url_for('static', filename='img/icons/wind-dark.png') }}" alt="">
+    <span id="tmrWindText">3m/s</span>
+    <img class="mini-ico" src="{{ url_for('static', filename='img/icons/uv-dark.png') }}" alt="">
+    <span id="tmrUvText">보통</span>
+  </div>
+
+  <div class="hint-box"></div>
+  <div class="hint-title">
+    <img class="hint-ico" src="{{ url_for('static', filename='img/icons/bulb.png') }}" alt="">
+    내일 코디 힌트
+  </div>
+  <div class="hint-desc" id="tmrHintText">
+    내일은 오늘보다 3°C 더 추워요. 오늘보다 한 단계 두꺼운 아우터를 준비해보세요.
+  </div>
+
 </div>
-<div class="topbar__title">코디</div>
-<div class="topbar__right"></div>
 {% endblock %}
 
-{% block content %}
-<section class="hero">
-  <div class="row space-between">
-    <div class="row">
-      <span class="pin">📍</span>
-      <span class="muted">{{ data.location }}</span>
-    </div>
-    <div class="date">{{ data.date }}</div>
-  </div>
-
-  <div class="hero-card card">
-    <div class="hero-left">
-      <div class="hero-icon">☁️</div>
-      <div class="hero-temp">{{ data.temp }}°C</div>
-      <div class="muted">체감 {{ data.feels_like }}°C</div>
-    </div>
-
-    <div class="hero-right">
-      <div class="hero-grid">
-        <div class="kv">
-          <div class="k">습도</div><div class="v">{{ data.humidity }}%</div>
-        </div>
-        <div class="kv">
-          <div class="k">바람</div><div class="v">{{ data.wind }}</div>
-        </div>
-        <div class="kv">
-          <div class="k">강수확률</div><div class="v">{{ data.rain_prob }}%</div>
-        </div>
-        <div class="kv">
-          <div class="k">자외선</div><div class="v">{{ data.uv }}</div>
-        </div>
-        <div class="kv">
-          <div class="k">미세먼지</div><div class="v">{{ data.pm10 }}</div>
-        </div>
-        <div class="kv">
-          <div class="k">초미세먼지</div><div class="v">{{ data.pm25 }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="today-item">
-  <div class="section-hd">
-    <div class="section-title">오늘의 아이템</div>
-  </div>
-
-  <div class="card item-card">
-    <img class="item-img" src="{{ data.item.img }}" alt="오늘의 아이템 이미지">
-    <div class="item-body">
-      <div class="item-name">{{ data.item.name }}</div>
-      <div class="item-desc">{{ data.item.desc }}</div>
-
-      <div class="row space-between item-actions">
-        <button class="btn-outline" type="button" data-toast="저장 완료!">⭐ 즐겨찾기</button>
-        <button class="btn-outline" type="button" data-toast="채택 체크!">✅ 채택하기</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card health-card">
-    <div class="health-title">건강·주의사항</div>
-    <div class="health-list">
-      {% for c in data.health_cards %}
-      <div class="health-item card--white">
-        <div class="health-item__title">{{ c.title }}</div>
-        <div class="health-item__desc muted">{{ c.desc }}</div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<section class="prefs">
-  <div class="section-hd">
-    <div class="section-title">나의 설정</div>
-  </div>
-
-  <div class="card prefs-card">
-    <div class="prefs-row">
-      <div class="prefs-label">회피 아이템</div>
-      <div class="prefs-tags">
-        {% for t in data.prefs.avoid %}
-          <span class="pill">{{ t }}</span>
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="prefs-row">
-      <div class="prefs-label">스타일 취향</div>
-      <div class="prefs-tags">
-        {% for t in data.prefs.style %}
-          <span class="pill">{{ t }}</span>
-        {% endfor %}
-      </div>
-    </div>
-
-    <a class="prefs-link" href="{{ url_for('mypage') }}">설정 변경하기 →</a>
-  </div>
-</section>
-
-<section class="outfit">
-  <div class="section-hd">
-    <div class="section-title">추천 코디</div>
-  </div>
-
-  <div class="card outfit-card">
-    <img class="outfit-img" src="{{ data.outfit.img }}" alt="추천 코디 이미지">
-    <div class="outfit-grid">
-      <div class="line"><span class="label">상의</span><span class="value">{{ data.outfit.top }}</span></div>
-      <div class="line"><span class="label">하의</span><span class="value">{{ data.outfit.bottom }}</span></div>
-      <div class="line"><span class="label">아우터</span><span class="value">{{ data.outfit.outer }}</span></div>
-      <div class="line"><span class="label">신발</span><span class="value">{{ data.outfit.shoes }}</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="tomorrow">
-  <div class="section-hd">
-    <div class="section-title">내일 미리보기</div>
-  </div>
-
-  <div class="card tomorrow-card">
-    <div class="row space-between">
-      <div class="row">
-        <div class="tomorrow-icon">🌧️</div>
-        <div>
-          <div class="tomorrow-temp">{{ data.tomorrow.temp }}°C</div>
-          <div class="muted">{{ data.tomorrow.diff }}</div>
-        </div>
-      </div>
-      <div class="t-metrics">
-        <div class="t-metric"><span class="k">강수</span><span class="v">{{ data.tomorrow.rain_prob }}%</span></div>
-        <div class="t-metric"><span class="k">바람</span><span class="v">{{ data.tomorrow.wind }}</span></div>
-        <div class="t-metric"><span class="k">자외선</span><span class="v">{{ data.tomorrow.uv }}</span></div>
-      </div>
-    </div>
-
-    <div class="hint">
-      <span class="hint-icon">💡</span>
-      <span class="muted">{{ data.tomorrow.hint }}</span>
-    </div>
-
-    <a class="tomorrow-link" href="{{ url_for('index') }}">홈에서 날씨 더 보기 →</a>
-  </div>
-</section>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/coordination.js') }}"></script>
 {% endblock %}
