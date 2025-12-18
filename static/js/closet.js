@@ -1,40 +1,49 @@
-(function () {
-  const rows = document.querySelectorAll(".cleanup-row");
-  const modeRadios = document.querySelectorAll('input[name="mode"]');
+document.addEventListener("DOMContentLoaded", () => {
+  const list = document.getElementById("cleanupList");
+  const btn = document.getElementById("cleanupBtn");
 
-  let currentMode = "discard";
+  // 체크 토글(한 아이템에서 trash/donate 중 하나만 선택되게)
+  list?.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLElement)) return;
+    if (!t.classList.contains("chk")) return;
 
-  modeRadios.forEach(r => {
-    r.addEventListener("change", () => {
-      currentMode = r.value;
-    });
+    const item = t.closest(".cleanup-item");
+    if (!item) return;
+
+    const kind = t.dataset.kind; // trash | donate
+    const trashBtn = item.querySelector('.chk[data-kind="trash"]');
+    const donateBtn = item.querySelector('.chk[data-kind="donate"]');
+
+    if (kind === "trash") {
+      trashBtn?.classList.toggle("is-on");
+      donateBtn?.classList.remove("is-on");
+    } else if (kind === "donate") {
+      donateBtn?.classList.toggle("is-on");
+      trashBtn?.classList.remove("is-on");
+    }
   });
 
-  // 각 행: discard / donate는 서로 배타
-  rows.forEach(row => {
-    const picks = row.querySelectorAll(".pick");
+  // 선택한 아이템 정리하기
+  btn?.addEventListener("click", () => {
+    const items = Array.from(document.querySelectorAll(".cleanup-item")).map((el) => {
+      const id = el.getAttribute("data-id");
+      const isTrash = el.querySelector('.chk[data-kind="trash"]')?.classList.contains("is-on");
+      const isDonate = el.querySelector('.chk[data-kind="donate"]')?.classList.contains("is-on");
 
-    picks.forEach(chk => {
-      chk.addEventListener("change", () => {
-        if (chk.checked) {
-          picks.forEach(other => {
-            if (other !== chk) other.checked = false;
-          });
-        }
-      });
-    });
+      let action = null;
+      if (isTrash) action = "trash";
+      if (isDonate) action = "donate";
 
-    // 행 탭하면 현재 모드로 토글(모바일 편의)
-    row.addEventListener("click", (e) => {
-      if (e.target.closest("input") || e.target.closest("label") || e.target.closest("button") || e.target.closest("a")) {
-        return;
-      }
-      const target = row.querySelector(`.pick[data-kind="${currentMode}"]`);
-      const other = row.querySelector(`.pick[data-kind="${currentMode === "discard" ? "donate" : "discard"}"]`);
-      if (!target) return;
+      return { id, action };
+    }).filter(x => x.action);
 
-      target.checked = !target.checked;
-      if (target.checked && other) other.checked = false;
-    });
+    if (!items.length) {
+      alert("정리할 아이템을 선택해줘!");
+      return;
+    }
+
+    // 다음 단계: 여기서 fetch("/api/closet/cleanup", {method:"POST", body: JSON.stringify(items)}) 붙이면 됨
+    alert("선택됨: " + JSON.stringify(items, null, 2));
   });
-})();
+});

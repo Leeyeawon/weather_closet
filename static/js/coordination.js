@@ -49,33 +49,45 @@ async function loadCoordinationUI() {
     // 지금은 화면에서 "기본 텍스트"가 유지될 거야.
     // 나중에 API 붙이면 여기서 setText("pm10Text", ... )만 하면 자동 연동됨.
 
-    // ===== 내일 =====
-    if (data.tomorrow) {
-      // 내일 날짜
-      const tmrDate = new Date();
-      tmrDate.setDate(tmrDate.getDate() + 1);
-      setText("tmrDateText", formatKoreanDate(tmrDate));
+  // ===== 내일 =====
+  if (data.tomorrow) {
+    // 내일 날짜
+    const tmrDate = new Date();
+    tmrDate.setDate(tmrDate.getDate() + 1);
+    setText("tmrDateText", formatKoreanDate(tmrDate));
 
-      // 내일 단일 온도(디자인이 1개라서 low 우선)
-      const tVal = (data.tomorrow.low != null) ? data.tomorrow.low
-                 : (data.tomorrow.hi != null) ? data.tomorrow.hi
-                 : null;
+    const tHi = (data.tomorrow.hi != null) ? Number(data.tomorrow.hi) : null;
+    const tLow = (data.tomorrow.low != null) ? Number(data.tomorrow.low) : null;
+    const tPop = (data.tomorrow.pop != null) ? Number(data.tomorrow.pop) : null;
 
-      if (tVal != null) setText("tmrTempText", `${tVal}°C`);
+    // ✅ 내일 표시 온도(디자인이 1개라서 low 우선)
+    const tDisplay = (tLow != null) ? tLow : (tHi != null ? tHi : null);
+    if (tDisplay != null) setText("tmrTempText", `${Math.round(tDisplay)}°C`);
 
-      // 오늘 vs 내일 차이 문구
-      const nowTemp = data.now?.temp;
-      if (nowTemp != null && tVal != null) {
-        const diff = Math.round(tVal - nowTemp); // 내일-오늘
-        const abs = Math.abs(diff);
-        if (diff < 0) setText("tmrDeltaText", `오늘보다 ${abs}°C 낮음`);
-        else if (diff > 0) setText("tmrDeltaText", `오늘보다 ${abs}°C 높음`);
-        else setText("tmrDeltaText", `오늘과 비슷함`);
+    // ✅ 내일 강수확률
+    if (tPop != null) setText("tmrPopText", `${Math.round(tPop)}%`);
 
-        // 코디 힌트 (간단 규칙)
-        setText("tmrHintText", makeTomorrowHint(diff));
+    // ✅ 오늘 vs 내일 기온차 (가능하면 내일 평균(hi+low)/2로 비교)
+    const nowTemp = (data.now?.temp != null) ? Number(data.now.temp) : null;
+    const tCompare = (tHi != null && tLow != null) ? (tHi + tLow) / 2 : tDisplay;
+
+    if (nowTemp != null && tCompare != null) {
+      const diff = Math.round(tCompare - nowTemp); // 내일-오늘
+      const abs = Math.abs(diff);
+
+      if (diff < 0) setText("tmrDeltaText", `오늘보다 ${abs}°C 낮음`);
+      else if (diff > 0) setText("tmrDeltaText", `오늘보다 ${abs}°C 높음`);
+      else setText("tmrDeltaText", `오늘과 비슷함`);
+
+      // ✅ 내일 코디 힌트: "기온" 중심 + "강수확률" 보정
+      setText("tmrHintText", makeTomorrowHintByTemp(tCompare, tPop, data.tomorrow.cond_text));
+    } else {
+      // 비교 불가해도 힌트는 온도로만 생성
+      if (tCompare != null) {
+        setText("tmrHintText", makeTomorrowHintByTemp(tCompare, tPop, data.tomorrow.cond_text));
       }
     }
+  }
 
   } catch (e) {
     console.warn("coordination api/weather error:", e);
@@ -87,13 +99,28 @@ function setText(id, text) {
   if (el) el.textContent = text;
 }
 
-function makeTomorrowHint(diff) {
-  if (diff <= -4) return "내일은 오늘보다 꽤 더 추워요. 한 단계 두꺼운 아우터 + 목 보온을 추천해요.";
-  if (diff <= -2) return "내일은 오늘보다 더 추워요. 오늘보다 조금 더 따뜻한 겉옷을 준비해보세요.";
-  if (diff >= 4)  return "내일은 오늘보다 꽤 더 따뜻해요. 이너를 가볍게 하거나 겉옷은 얇게 추천해요.";
-  if (diff >= 2)  return "내일은 오늘보다 조금 더 따뜻해요. 겉옷은 가볍게 조절해도 좋아요.";
-  return "내일은 오늘과 비슷한 체감이에요. 실내외 온도차만 조심해요.";
+function makeTomorrowHintByTemp(tempC, pop, condText) {
+  const t = Number(tempC);
+  const p = (pop == null) ? null : Number(pop);
+  const cond = String(condText || "");
+
+  // 비/눈 가능성 높으면 우선 안내
+  const rainLikely = (p != null && p >= 60) || /비|눈|소나기/.test(cond);
+  if (rainLikely) {
+    if (t <= 5) return "내일은 비/눈 가능성이 있어요. 방수되는 아우터 + 미끄럼 주의 신발을 추천해요.";
+    return "내일은 비 올 가능성이 있어요. 우산 + 방수 아우터/신발을 준비해보세요.";
+  }
+
+  // 기온대별 코디 힌트
+  if (t <= -3) return "내일은 매우 추워요. 롱패딩/두꺼운 코트 + 목도리/장갑까지 챙겨요.";
+  if (t <= 2)  return "내일은 체감이 차가워요. 패딩/코트 + 머플러 조합 추천해요.";
+  if (t <= 8)  return "내일은 쌀쌀한 편이에요. 코트/두꺼운 니트 + 긴바지로 따뜻하게 입어요.";
+  if (t <= 13) return "내일은 선선해요. 자켓/가디건 한 겹 챙기면 좋아요.";
+  if (t <= 18) return "내일은 무난한 날씨예요. 긴팔 + 얇은 겉옷이면 충분해요.";
+  if (t <= 24) return "내일은 따뜻한 편이에요. 가벼운 셔츠/긴팔 위주로, 겉옷은 선택!";
+  return "내일은 더울 수 있어요. 통풍 좋은 옷으로 가볍게 입고, 햇빛 대비도 해주세요.";
 }
+
 
 /* ===== 임시: 오늘의 아이템 로테이션(나중에 DB/시트로 교체 가능) ===== */
 const ITEMS = [
@@ -129,3 +156,4 @@ function rotateItem() {
 
   setText("itemPageText", `${itemIndex + 1}/${ITEMS.length}`);
 }
+

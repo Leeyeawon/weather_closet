@@ -278,6 +278,83 @@ def make_air_tip(temp_c, wind_ms, rh, date_yyyymmdd):
     return pick_tip_daily("nice", date_yyyymmdd)
 
 # =========================
+# 내일 코디 팁
+# =========================
+
+TOMORROW_TIPS = {
+    "rainy": [
+        "내일은 비 소식이 있어요. 방수되는 아우터나 우산을 꼭 챙겨요.",
+        "내일은 비가 올 수 있어요. 미끄럼 방지 신발이면 더 좋아요.",
+        "비 대비해서 어두운 컬러 하의/여벌 양말 챙기면 좋아요.",
+        "내일은 비 확률이 있어요. 짧은 동선이라도 우산 추천!",
+    ],
+    "v_cold": [
+        "내일은 한파 체감일 수 있어요. 패딩 + 방한템(목도리/장갑) 추천!",
+        "내일 최저기온이 낮아요. 내복/히트텍 레이어드가 좋아요.",
+        "내일은 바람까지 불면 더 추워요. 귀/목 보온 꼭 챙겨요.",
+    ],
+    "cold": [
+        "내일은 꽤 쌀쌀해요. 코트/점퍼 + 따뜻한 니트 조합 추천!",
+        "내일은 손발이 차가울 수 있어요. 두꺼운 양말 추천해요.",
+        "내일은 외투 필수! 기모 이너까지 준비하면 더 좋아요.",
+    ],
+    "cool": [
+        "내일은 선선해요. 가디건/자켓 한 겹이면 딱 좋아요.",
+        "내일은 아침저녁 쌀쌀할 수 있어요. 얇은 아우터 추천!",
+        "내일은 레이어드하기 좋아요. 셔츠+니트 조합 추천!",
+    ],
+    "mild": [
+        "내일은 무난한 날씨예요. 긴팔 + 가벼운 겉옷 정도면 좋아요.",
+        "내일은 활동하기 좋아요. 편한 캐주얼 코디 추천!",
+        "내일은 낮에 따뜻할 수 있어요. 탈착 가능한 아우터가 좋아요.",
+    ],
+    "warm": [
+        "내일은 따뜻한 편! 얇은 긴팔/셔츠로 가볍게 입어요.",
+        "내일은 살짝 더울 수 있어요. 통풍 좋은 소재 추천!",
+        "내일은 실내외 온도차 대비로 얇은 겉옷 하나면 좋아요.",
+    ],
+    "hot": [
+        "내일은 덥게 느껴질 수 있어요. 반팔 + 시원한 소재 추천!",
+        "내일은 땀나기 쉬워요. 린넨/쿨링 소재가 좋아요.",
+        "내일은 햇볕이 강할 수 있어요. 모자/선크림 추천!",
+    ],
+    "v_hot": [
+        "내일은 폭염 느낌일 수 있어요. 밝은색 + 얇은 옷, 수분 보충!",
+        "내일은 매우 더울 수 있어요. 통풍 좋은 코디로 가볍게!",
+        "내일은 야외활동이면 양산/모자 추천해요.",
+    ],
+}
+
+def tomorrow_band_key(temp_avg):
+    if temp_avg is None:
+        return "mild"
+    if temp_avg < 0:  return "v_cold"
+    if temp_avg < 6:  return "cold"
+    if temp_avg < 12: return "cool"
+    if temp_avg < 19: return "mild"
+    if temp_avg < 24: return "warm"
+    if temp_avg < 28: return "hot"
+    return "v_hot"
+
+def pick_daily_from_list(msgs, seed_str):
+    seed = seed_str.encode("utf-8")
+    idx = int(hashlib.sha256(seed).hexdigest(), 16) % len(msgs)
+    return msgs[idx]
+
+def make_tomorrow_tip(tmr_hi, tmr_low, tmr_pop, tmr_icon, date_yyyymmdd):
+    # 비/눈이면 그걸 최우선 힌트로
+    if tmr_icon in ("rain", "sleet", "snow") or (tmr_pop is not None and tmr_pop >= 60):
+        return pick_daily_from_list(TOMORROW_TIPS["rainy"], f"tmr:{date_yyyymmdd}:rainy")
+
+    temp_avg = None
+    if tmr_hi is not None and tmr_low is not None:
+        temp_avg = (float(tmr_hi) + float(tmr_low)) / 2.0
+
+    band = tomorrow_band_key(temp_avg)
+    msgs = TOMORROW_TIPS.get(band, TOMORROW_TIPS["mild"])
+    return pick_daily_from_list(msgs, f"tmr:{date_yyyymmdd}:{band}")
+
+# =========================
 # 페이지 라우트
 # =========================
 @app.get("/")
@@ -312,83 +389,76 @@ def api_weather():
     nowcast = get_ultra_now(nx, ny)
     forecast = get_vilage_forecast(nx, ny)
 
-    # nowcast 기본값
-    d = nowcast.get("data", {}) if nowcast.get("ok") else {}
-    temp_c = _safe_float(d.get("T1H"))
-    wind_ms = _safe_float(d.get("WSD"))
-    rh = _safe_float(d.get("REH"))
-
-    # 체감/코디 문구
-    today = now.strftime("%Y%m%d")
-    feels_c = calc_feels_c(temp_c, wind_ms, rh)
-    outfit_text = pick_daily_message(band_key(feels_c), today) if feels_c is not None else "날씨 정보를 불러오는 중이에요."
-
-    # air tip 문구
-    air_tip_text = make_air_tip(temp_c, wind_ms, rh, today)
-
-    # forecast에서 현재 POP/상태, 내일 요약 만들기
+    # ===== forecast items는 함수 안에서 뽑아야 함 =====
     items = forecast.get("items", []) if forecast.get("ok") else []
 
-    now_pop = None
-    now_cond_text, now_icon = ("-", "unknown")
-    tmr_hi = tmr_low = None
-    tmr_pop = None
-    tmr_cond_text, tmr_icon = ("-", "unknown")
+    # ===== 현재(예보 기반) POP/상태/아이콘 =====
+    now_dt = _round_to_hour(datetime.now(KST))
+    fcst_date = now_dt.strftime("%Y%m%d")
+    fcst_time = now_dt.strftime("%H00")
 
-    if items:
-        now_dt = _round_to_hour(now)
-        fcst_date = now_dt.strftime("%Y%m%d")
-        fcst_time = now_dt.strftime("%H00")
+    now_pop = _fcst_get(items, fcst_date, fcst_time, "POP")
+    now_sky = _fcst_get(items, fcst_date, fcst_time, "SKY")
+    now_pty = _fcst_get(items, fcst_date, fcst_time, "PTY")
+    now_cond_text, now_icon = _weather_text_icon(str(now_pty or "0"), str(now_sky or ""))
 
-        now_pop_v = _fcst_get(items, fcst_date, fcst_time, "POP")
-        now_pop = None if now_pop_v is None else int(float(now_pop_v))
+    # ===== 내일 요약(최고/최저, POP, 상태/아이콘) =====
+    tmr = (now_dt + timedelta(days=1)).strftime("%Y%m%d")
 
-        now_sky = _fcst_get(items, fcst_date, fcst_time, "SKY")
-        now_pty = _fcst_get(items, fcst_date, fcst_time, "PTY")
-        now_cond_text, now_icon = _weather_text_icon(now_pty, now_sky)
+    tmr_tmp_list = []
+    for it in items:
+        if it.get("fcstDate") == tmr and it.get("category") == "TMP":
+            v = _safe_float(it.get("fcstValue"))
+            if v is not None:
+                tmr_tmp_list.append(v)
 
-        tmr = (now_dt + timedelta(days=1)).strftime("%Y%m%d")
+    tmr_hi = round(max(tmr_tmp_list)) if tmr_tmp_list else None
+    tmr_low = round(min(tmr_tmp_list)) if tmr_tmp_list else None
 
-        tmr_tmp_list = []
-        for it in items:
-            if it.get("fcstDate") == tmr and it.get("category") == "TMP":
-                v = _safe_float(it.get("fcstValue"))
-                if v is not None:
-                    tmr_tmp_list.append(v)
+    tmr_time = "1200"
+    tmr_pop = _fcst_get(items, tmr, tmr_time, "POP")
+    tmr_sky = _fcst_get(items, tmr, tmr_time, "SKY")
+    tmr_pty = _fcst_get(items, tmr, tmr_time, "PTY")
+    tmr_cond_text, tmr_icon = _weather_text_icon(str(tmr_pty or "0"), str(tmr_sky or ""))
 
-        if tmr_tmp_list:
-            tmr_hi = round(max(tmr_tmp_list))
-            tmr_low = round(min(tmr_tmp_list))
+    # ===== 코디 문구/체감 =====
+    outfit_text = "날씨 정보를 불러오는 중이에요."
+    feels_c = None
 
-        tmr_time = "1200"
-        tmr_pop_v = _fcst_get(items, tmr, tmr_time, "POP")
-        tmr_pop = None if tmr_pop_v is None else int(float(tmr_pop_v))
+    temp_c = _safe_float((nowcast.get("data") or {}).get("T1H")) if nowcast.get("ok") else None
+    wind_ms = _safe_float((nowcast.get("data") or {}).get("WSD")) if nowcast.get("ok") else None
+    rh = _safe_float((nowcast.get("data") or {}).get("REH")) if nowcast.get("ok") else None
 
-        tmr_sky = _fcst_get(items, tmr, tmr_time, "SKY")
-        tmr_pty = _fcst_get(items, tmr, tmr_time, "PTY")
-        tmr_cond_text, tmr_icon = _weather_text_icon(tmr_pty, tmr_sky)
+    if temp_c is not None:
+        feels_c = calc_feels_c(temp_c, wind_ms, rh)
+        band = band_key(feels_c)
+        today = datetime.now(KST).strftime("%Y%m%d")
+        outfit_text = pick_daily_message(band, today)
+
+    # ===== air tip =====
+    today = datetime.now(KST).strftime("%Y%m%d")
+    air_tip_text = make_air_tip(temp_c, wind_ms, rh, today)
 
     payload = {
         "nx": nx,
         "ny": ny,
-
-        # 원본(디버깅/확장용)
         "nowcast": nowcast,
         "forecast": forecast,
 
-        # 화면에 바로 꽂을 요약값
         "now": {
             "temp": temp_c,
             "hum": rh,
             "wind": wind_ms,
-            "pop": now_pop,
+            "pop": None if now_pop is None else int(float(now_pop)),
             "cond_text": now_cond_text,
             "icon": now_icon,
+            # (추후) uv/pm10/pm25 붙이면 여기 추가
         },
+
         "tomorrow": {
             "hi": tmr_hi,
             "low": tmr_low,
-            "pop": tmr_pop,
+            "pop": None if tmr_pop is None else int(float(tmr_pop)),
             "cond_text": tmr_cond_text,
             "icon": tmr_icon,
         },
@@ -396,6 +466,11 @@ def api_weather():
         "feels_c": None if feels_c is None else round(feels_c),
         "outfit_text": outfit_text,
         "air_tip_text": air_tip_text,
+
+        # (추후) 미세먼지/초미세먼지/자외선 실제값은 다른 API 붙여야 함 → 지금은 None
+        "pm10": None,
+        "pm25": None,
+        "uv": None,
     }
 
     _CACHE[key] = {"ts": now, "data": payload}

@@ -1,166 +1,179 @@
-.section{ margin-top:18px; }
-.section-hd{ margin:0 0 10px; }
-.section-title{ font-size:18px; line-height:28px; font-weight:400; color:var(--text); }
-.section-sub{ margin-top:2px; font-size:12px; color:var(--muted2); }
+.closet-page{
+  background:#FAFAFA;
+  padding: 0 20px 12px;
+}
 
-.pin{ color:var(--blue); }
-.w-full{ width:100%; }
-
-/* Insight */
-.insight{ padding:14px 16px; }
-.insight-hd{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.insight-title{ font-size:14px; color:var(--blue); }
-.insight-text{ margin:0; font-size:16px; color:var(--text); line-height:1.6; }
-
-/* List */
-.list{ padding:0; overflow:hidden; }
-.list-row{
-  display:flex;
-  gap:12px;
-  padding:14px 14px;
-  border-top:1px solid var(--line);
-  position:relative;
-}
-.list-row:first-child{ border-top:0; }
-.thumb{
-  width:73px; height:73px;
-  border-radius:10px;
-  object-fit:cover;
-  border:1px solid var(--line);
-  background:#eee;
-}
-.mini{
-  width:48px; height:48px;
-  border-radius:8px;
-  object-fit:cover;
-  border:1px solid var(--line);
-  background:#eee;
-}
-.list-body{ flex:1; min-width:0; }
-.list-title{ font-size:14px; color:var(--text); line-height:1.4; }
-.list-sub{ font-size:12px; color:var(--muted2); margin-top:4px; }
-.chip{
-  display:inline-block;
-  margin-top:8px;
-  padding:6px 10px;
-  border-radius:8px;
-  background:#F5F5F5;
-  color:#404040;
-  font-size:12px;
-  text-decoration:none;
-}
-.star{
-  position:absolute;
-  right:12px;
-  top:14px;
-  width:34px; height:34px;
-  border-radius:10px;
-  border:1px solid var(--line);
+/* top */
+.topbar{
+  height: 60px;
   background:#fff;
-  color:var(--blue);
+  margin: 0 -20px;
+  border-bottom: 1px solid #eee;
+}
+.top-title{
+  position: sticky;
+  top: 0;
+  margin-top: -60px;
+  height: 60px;
   display:flex;
   align-items:center;
   justify-content:center;
+  font-size: 18px;
+  background:#fff;
+  z-index: 2;
 }
-.list-row.compact{ align-items:center; }
 
-/* Stats */
-.stats{ padding:14px 16px; }
-.stats-title{ font-size:14px; color:var(--text); margin-bottom:10px; }
-.stats-item{
+/* 공통 카드/타이틀 */
+.card{
+  background:#fff;
+  border:1px solid #E5E5E5;
+  border-radius:8px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.section-title{
+  margin-top: 18px;
+  font-size:18px;
+  color:#000;
+  line-height:28px;
+}
+.section-desc{
+  margin-top: 6px;
+  font-size:14px;
+  color:#525252;
+  font-family: Inter, "Noto Sans KR", sans-serif;
+}
+
+/* insight */
+.insight-head{
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:10px 0;
-  border-top:1px dashed var(--line);
+  gap:8px;
+  margin-bottom: 6px;
 }
-.stats-item:first-of-type{ border-top:0; padding-top:2px; }
-.stats-body{ flex:1; min-width:0; }
-.stats-name{ font-size:14px; color:var(--text); }
-.stats-cat{ font-size:12px; color:var(--muted2); margin-top:2px; }
-.stats-count{ font-size:14px; color:var(--text); }
-.stats-tip{
-  margin-top:10px;
-  padding:10px 12px;
-  border-radius:10px;
+.insight-ico{ width:12px; height:16px; }
+.insight-label{ color:#0075FF; font-size:14px; }
+.insight-text{ color:#171717; font-size:16px; line-height:25.6px; }
+
+/* favorites */
+.fav{
+  display:grid;
+  grid-template-columns: 73px 1fr auto;
+  grid-template-rows: auto auto auto;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items:start;
+  position: relative;
+}
+.thumb{
+  grid-row: 1 / span 3;
+  width:73px; height:73px;
+  border-radius:8px;
+  object-fit: cover;
+}
+.fav-date{ font-size:14px; color:#000; }
+.fav-meta{ font-size:12px; color:#525252; }
+
+.pill-btn{
+  justify-self: start;
+  border: 0;
+  background:#F5F5F5;
+  border-radius:3px;
+  padding: 4px 8px;
   font-size:12px;
   color:#404040;
-  line-height:1.5;
+  cursor:pointer;
 }
 
-/* Cleanup */
-.cleanup{ padding:14px 16px; }
-.legend{
-  display:flex;
-  gap:14px;
-  align-items:center;
-  margin-bottom:12px;
-  flex-wrap:wrap;
+.star-btn{
+  border:0;
+  background:transparent;
+  color:#0075FF;
+  font-size:18px;
+  cursor:pointer;
+  align-self:start;
 }
-.legend-item{
+
+/* stats rows */
+.sub-title{
+  font-size:14px;
+  color:#171717;
+  margin-bottom: 10px;
+}
+.row{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap: 10px;
+  padding: 10px 0;
+}
+.row + .row{ border-top: 1px solid #f0f0f0; }
+
+.mini-thumb{
+  width:40px; height:40px;
+  border-radius:4px;
+  object-fit: cover;
+  background:#F7F7F7;
+}
+.row-main .name{ font-size:14px; color:#000; }
+.row-main .meta{ font-size:12px; color:#525252; margin-top:2px; }
+.count{ margin-left:auto; font-size:14px; color:#000; }
+
+.note{
+  margin-top: 10px;
+  background:#FAFAFA;
+  border-radius:5px;
+  padding: 10px;
   font-size:12px;
-  color:#111;
+  color:#404040;
+  line-height: 16px;
 }
-.legend-item input{ display:none; }
-.box{
-  width:14px; height:14px;
-  border-radius:2px;
-  border:1px solid #111;
-  background:#fff;
-  position:relative;
-}
-.box--fill{ background:var(--blue); border-color:var(--blue); }
 
-.cleanup-list{ display:flex; flex-direction:column; gap:12px; }
-.cleanup-row{
+/* cleanup */
+.cleanup{ padding-bottom: 14px; }
+.cleanup-item{
   display:flex;
-  gap:12px;
-  padding:12px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:#fff;
+  gap: 12px;
+  padding: 12px 0;
 }
-.cleanup-body{ flex:1; min-width:0; }
-.cleanup-name{ font-size:14px; color:var(--text); }
-.cleanup-meta{ font-size:12px; color:var(--muted2); margin-top:3px; }
+.cleanup-item + .cleanup-item{ border-top: 1px solid #f0f0f0; }
 
-.toggles{
-  display:flex;
-  gap:12px;
-  margin-top:10px;
-  flex-wrap:wrap;
+.big-thumb{
+  width:48px; height:48px;
+  border-radius:4px;
+  object-fit: cover;
 }
-.toggle{
+
+.choice{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap: 8px;
+  margin-top: 8px;
   font-size:12px;
-  color:#111;
+  color:#000;
+  flex-wrap: wrap;
 }
-.toggle input{ display:none; }
-.check{
-  width:14px; height:14px;
-  border-radius:2px;
-  border:1px solid #111;
+.chk{
+  width:13px;
+  height:13px;
+  border-radius:1px;
+  border: 0.5px solid #000;
   background:#fff;
-  position:relative;
+  cursor:pointer;
 }
-.toggle input:checked + .check{
-  background:var(--blue);
-  border-color:var(--blue);
-}
-.toggle input:checked + .check::after{
-  content:"";
-  position:absolute;
-  left:3px; top:1px;
-  width:6px; height:9px;
-  border-right:2px solid #fff;
-  border-bottom:2px solid #fff;
-  transform:rotate(45deg);
+.chk.is-on{
+  background:#0075FF;
+  border-color:#0075FF;
 }
 
-/* Primary button 이미 common.css에 btn-primary가 있다면 이건 생략 가능 */
-.btn-primary.w-full{ margin-top:14px; }
+.primary-btn{
+  width: 100%;
+  height: 39px;
+  margin-top: 12px;
+  border:0;
+  border-radius:5px;
+  background:#000;
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+}

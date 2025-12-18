@@ -1,178 +1,151 @@
 {% extends "base.html" %}
-{% block title %}프로필{% endblock %}
+{% block title %}마이페이지{% endblock %}
+
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}">
 {% endblock %}
 
-{% block topbar %}
-<div class="topbar__left">
-  <a class="icon-btn" href="{{ url_for('index') }}" aria-label="뒤로">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </a>
-</div>
-<div class="topbar__title">마이페이지</div>
-<div class="topbar__right"></div>
-{% endblock %}
-
 {% block content %}
+<div class="mypage">
 
-<!-- 프로필 카드 -->
-<section class="card profile">
-  <img class="avatar" src="{{ data.user.avatar }}" alt="프로필 이미지">
-  <div class="pmeta">
-    <div class="pname">{{ data.user.name }}</div>
-    <div class="psub">스타일 프로필</div>
-  </div>
+  <div class="topbar"></div>
+  <div class="top-title">마이페이지</div>
 
-  <div class="grid">
-    <div class="row">
-      <div class="label">체감온도</div>
-      <div class="tags">
-        <span class="tag">{{ data.user.temp_tag }}</span>
+  <!-- 프로필 카드 -->
+  <section class="card profile-card">
+    <img class="avatar" src="https://placehold.co/48x48" alt="">
+    <div class="name">이예원</div>
+    <div class="subtitle">스타일 프로필</div>
+
+    <div class="kv">
+      <div class="k">체감온도</div>
+      <div class="v" id="feelTag">#추위 민감</div>
+    </div>
+
+    <div class="kv">
+      <div class="k">스타일</div>
+      <div class="v">
+        <span class="tag">#포멀</span>
+        <span class="tag">#러블리</span>
       </div>
     </div>
 
-    <div class="row">
-      <div class="label">스타일</div>
-      <div class="tags">
-        {% for t in data.user.styles %}
-        <span class="tag">{{ t }}</span>
-        {% endfor %}
+    <div class="kv">
+      <div class="k">회피 아이템</div>
+      <div class="v">
+        <span class="tag">#민소매</span>
+        <span class="tag">#반바지</span>
+        <span class="tag">#탑</span>
       </div>
     </div>
+  </section>
 
-    <div class="row">
-      <div class="label">회피 아이템</div>
-      <div class="tags">
-        {% for t in data.user.avoid %}
-        <span class="tag">{{ t }}</span>
-        {% endfor %}
-      </div>
+  <!-- 회피 의상 관리 -->
+  <section class="card block">
+    <div class="block-head">
+      <div class="block-title">회피 의상 관리</div>
+      <button class="text-btn" id="avoidEditBtn" type="button">편집</button>
     </div>
-  </div>
-</section>
 
-<!-- 회피 의상 관리 -->
-<section class="card">
-  <div class="card-hd">
-    <div class="card-title">회피 의상 관리</div>
-    <button class="link-btn" type="button" data-toast="편집 모드!">편집</button>
-  </div>
+    <div class="pill-row" id="avoidPills">
+      <span class="pill">민소매 <button class="x" type="button" aria-label="삭제">×</button></span>
+      <span class="pill">반바지 <button class="x" type="button" aria-label="삭제">×</button></span>
+      <span class="pill">탑 <button class="x" type="button" aria-label="삭제">×</button></span>
+    </div>
 
-  <div class="pill-row" id="avoidPills">
-    {% for it in data.avoid_manage %}
-    <span class="pill">
-      {{ it }}
-      <button class="pill-x" type="button" aria-label="삭제" data-remove-pill>✕</button>
-    </span>
-    {% endfor %}
-  </div>
-
-  <form class="addbar" id="avoidAddForm">
-    <button class="addbar__icon" type="submit" aria-label="추가">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
+    <button class="outline-btn" id="avoidAddBtn" type="button">
+      <span class="plus">＋</span> 회피 아이템 추가
     </button>
-    <input class="addbar__input" id="avoidInput" placeholder="회피 아이템 추가 (예: 민소매)" autocomplete="off">
-    <button class="addbar__btn" type="submit">추가</button>
-  </form>
-</section>
+  </section>
 
-<!-- 취향(스타일) 설정 -->
-<section class="card">
-  <div class="card-hd">
-    <div class="card-title">취향(스타일) 설정</div>
-  </div>
+  <!-- 취향(스타일) 설정 -->
+  <section class="card block">
+    <div class="block-title">취향(스타일) 설정</div>
 
-  <!-- 1) 캐주얼 ~ 포멀 -->
-  <div class="slider-block">
-    <div class="slider-top">
-      <span class="s-left">캐주얼</span>
-      <span class="s-right">포멀</span>
+    <div class="slider-block">
+      <div class="slider-labels">
+        <span>캐주얼</span>
+        <span>포멀</span>
+      </div>
+      <input class="slider" id="style1" type="range" min="0" max="100" value="72">
     </div>
-    <input
-      type="range"
-      min="0" max="100"
-      value="{{ data.sliders.casual_formal }}"
-      class="slider"
-      id="s1"
-    >
-  </div>
 
-  <!-- 2) 심플 ~ 러블리 -->
-  <div class="slider-block">
-    <div class="slider-top">
-      <span class="s-left">심플</span>
-      <span class="s-right">러블리</span>
+    <div class="slider-block">
+      <div class="slider-labels">
+        <span>심플</span>
+        <span>러블리</span>
+      </div>
+      <input class="slider" id="style2" type="range" min="0" max="100" value="58">
     </div>
-    <input
-      type="range"
-      min="0" max="100"
-      value="{{ data.sliders.simple_lovely }}"
-      class="slider"
-      id="s2"
-    >
-  </div>
+  </section>
 
-  <div class="hint">
-    현재 설정: <b id="sliderHint"></b>
-  </div>
-</section>
+  <!-- 건강 상태 설정 -->
+  <section class="card block">
+    <div class="block-title">건강 상태 설정</div>
 
-<!-- 건강 상태 설정 -->
-<section class="card">
-  <div class="card-hd">
-    <div class="card-title">건강 상태 설정</div>
-  </div>
-
-  <div class="checklist">
-    {% for item in data.health %}
-    <label class="checkrow">
-      <span class="checktext">{{ item.label }}</span>
-      <input type="checkbox" {% if item.checked %}checked{% endif %}>
-      <span class="checkui"></span>
+    <label class="check-row">
+      <span>비염</span>
+      <input type="checkbox" checked>
     </label>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- 보유 보조 아이템 -->
-<section class="card">
-  <div class="card-hd">
-    <div class="card-title">보유 보조 아이템</div>
-  </div>
-
-  <div class="checklist">
-    {% for item in data.aids %}
-    <label class="checkrow">
-      <span class="checktext">{{ item.label }}</span>
-      <input type="checkbox" {% if item.checked %}checked{% endif %}>
-      <span class="checkui"></span>
+    <label class="check-row">
+      <span>햇빛 알레르기</span>
+      <input type="checkbox">
     </label>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- 알림 설정 -->
-<section class="card">
-  <div class="card-hd">
-    <div class="card-title">알림 설정</div>
-  </div>
-
-  <div class="checklist">
-    {% for item in data.notify %}
-    <label class="checkrow">
-      <span class="checktext">{{ item.label }}</span>
-      <input type="checkbox" {% if item.checked %}checked{% endif %}>
-      <span class="checkui"></span>
+    <label class="check-row">
+      <span>아토피/피부 민감</span>
+      <input type="checkbox">
     </label>
-    {% endfor %}
-  </div>
-</section>
+    <label class="check-row">
+      <span>기압 변화에 따른 두통</span>
+      <input type="checkbox">
+    </label>
+  </section>
 
+  <!-- 보유 보조 아이템 -->
+  <section class="card block">
+    <div class="block-title">보유 보조 아이템</div>
+
+    <label class="check-row">
+      <span>마스크</span>
+      <input type="checkbox" checked>
+    </label>
+    <label class="check-row">
+      <span>양산</span>
+      <input type="checkbox" checked>
+    </label>
+    <label class="check-row">
+      <span>모자</span>
+      <input type="checkbox">
+    </label>
+    <label class="check-row">
+      <span>레인부츠</span>
+      <input type="checkbox">
+    </label>
+    <label class="check-row">
+      <span>우비</span>
+      <input type="checkbox" checked>
+    </label>
+  </section>
+
+  <!-- 알림 설정 -->
+  <section class="card block">
+    <div class="block-title">알림 설정</div>
+
+    <label class="check-row">
+      <span>아침에 "오늘의 아이템" 알림</span>
+      <input type="checkbox" checked>
+    </label>
+    <label class="check-row">
+      <span>미세먼지 나쁜 날 마스크 알림</span>
+      <input type="checkbox" checked>
+    </label>
+    <label class="check-row">
+      <span>자외선 강한 날 양산/모자 알림</span>
+      <input type="checkbox">
+    </label>
+  </section>
+
+</div>
 {% endblock %}
 
 {% block scripts %}

@@ -89,9 +89,13 @@
   <div class="tomorrow-title">내일 미리보기</div>
   <div class="card card-tomorrow"></div>
 
+  <div class="tomorrow-tip" id="tomorrowTipText">
+    내일 날씨를 반영해 코디 힌트를 준비 중이에요.
+  </div>
+
   <div class="tomorrow-circle" aria-hidden="true">
     <div class="tomorrow-circle-icon">
-      <img id="tomorrowIcon" class="weather-icon"
+      <img id="tomorrowIcon" class="tomorrow-icon"
           src="{{ url_for('static', filename='img/icons/cloud.png') }}" alt="">
     </div>
   </div>

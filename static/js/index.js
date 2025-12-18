@@ -1,12 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // CTA 클릭: 코디 페이지로
   const cta = document.getElementById("ctaBtn");
   if (cta) cta.addEventListener("click", () => (window.location.href = "/coordination"));
 
-  // 최초 1회 로드
   loadUI();
-
-  // 5분마다 갱신
   setInterval(loadUI, 5 * 60 * 1000);
 });
 
@@ -15,40 +11,35 @@ async function loadUI() {
     const res = await fetch("/api/weather", { cache: "no-store" });
     const data = await res.json();
 
-    // 부산 표시(고정)
+    // 도시(고정)
     const city = document.getElementById("cityText");
     if (city) city.textContent = "부산광역시";
 
-    // ===== 현재 날씨 =====
+    // ===== 현재 =====
     if (data.now) {
-      const tempEl = document.getElementById("tempText");
-      if (tempEl && data.now.temp != null) tempEl.textContent = `${Math.round(data.now.temp)}°C`;
+      if (data.now.temp != null) document.getElementById("tempText").textContent = `${Math.round(data.now.temp)}°C`;
+      if (data.feels_c != null) document.getElementById("feelsText").textContent = `체감온도 ${data.feels_c}°C`;
 
-      const feelsEl = document.getElementById("feelsText");
-      if (feelsEl && data.feels_c != null) feelsEl.textContent = `체감온도 ${data.feels_c}°C`;
+      if (data.now.hum != null) document.getElementById("humText").textContent = `${Math.round(data.now.hum)}%`;
+      if (data.now.wind != null) document.getElementById("windText").textContent = `${data.now.wind}m/s`;
+      if (data.now.pop != null) document.getElementById("popText").textContent = `${data.now.pop}%`;
 
-      const humEl = document.getElementById("humText");
-      if (humEl && data.now.hum != null) humEl.textContent = `${Math.round(data.now.hum)}%`;
+      if (data.now.cond_text) document.getElementById("condText").textContent = data.now.cond_text;
 
-      const windEl = document.getElementById("windText");
-      if (windEl && data.now.wind != null) windEl.textContent = `${data.now.wind}m/s`;
-
-      const popEl = document.getElementById("popText");
-      if (popEl && data.now.pop != null) popEl.textContent = `${data.now.pop}%`;
-
-      const condEl = document.getElementById("condText");
-      if (condEl && data.now.cond_text) condEl.textContent = data.now.cond_text;
-
-      // 아이콘 (현재)
-      const icon = data.now.icon || "unknown";
-      const iconEl = document.getElementById("weatherIcon");
-      if (iconEl) iconEl.src = `/static/img/icons/${icon}.png`;
+      // 현재 아이콘
+      if (data.now.icon && document.getElementById("weatherIcon")) {
+        document.getElementById("weatherIcon").src = `/static/img/icons/${data.now.icon}.png`;
+      }
     }
 
-    // ===== air tip =====
-    if (data.air_tip_text) {
-      const tipEl = document.getElementById("airTipText");
-      if (tipEl) tipEl.innerHTML = String(data.air_tip_text).replace(/\n/g, "<br/>");
+    // ===== 오늘 코디 문구 =====
+    if (data.outfit_text && document.getElementById("outfitText")) {
+      document.getElementById("outfitText").innerHTML = String(data.outfit_text).replace(/\n/g, "<br/>");
+    }
+
+    // ===== 대기질/컨디션 팁 =====
+    if (data.air_tip_text && document.getElementById("airTipText")) {
+      document.getElementById("airTipText").innerHTML = String(data.air_tip_text).replace(/\n/g, "<br/>");
     }
 
     // ===== 내일 미리보기 =====
@@ -56,25 +47,27 @@ async function loadUI() {
       const hi = data.tomorrow.hi;
       const low = data.tomorrow.low;
 
-      const tTempEl = document.getElementById("tomorrowTempText");
-      if (tTempEl && hi != null && low != null) tTempEl.textContent = `${hi}°C / ${low}°C`;
+      if (hi != null && low != null && document.getElementById("tomorrowTempText")) {
+        document.getElementById("tomorrowTempText").textContent = `${hi}°C / ${low}°C`;
+      }
+      if (data.tomorrow.cond_text && document.getElementById("tomorrowCondText")) {
+        document.getElementById("tomorrowCondText").textContent = data.tomorrow.cond_text;
+      }
+      if (data.tomorrow.pop != null && document.getElementById("tomorrowPopText")) {
+        document.getElementById("tomorrowPopText").textContent = `${data.tomorrow.pop}%`;
+      }
 
-      const tCondEl = document.getElementById("tomorrowCondText");
-      if (tCondEl && data.tomorrow.cond_text) tCondEl.textContent = data.tomorrow.cond_text;
-
-      const tPopEl = document.getElementById("tomorrowPopText");
-      if (tPopEl && data.tomorrow.pop != null) tPopEl.textContent = `${data.tomorrow.pop}%`;
-
-      // (선택) 내일 아이콘도 img로 바꾸면 여기서 동일하게 세팅 가능
-      // const tIcon = data.tomorrow.icon || "unknown";
-      // document.getElementById("tomorrowIcon").src = `/static/img/icons/${tIcon}.png`;
+      // 내일 아이콘(이미지로 쓸 때)
+      if (data.tomorrow.icon && document.getElementById("tomorrowIcon")) {
+        document.getElementById("tomorrowIcon").src = `/static/img/icons/${data.tomorrow.icon}.png`;
+      }
     }
 
-    // ===== outfit =====
-    if (data.outfit_text) {
-      const outfitEl = document.getElementById("outfitText");
-      if (outfitEl) outfitEl.innerHTML = String(data.outfit_text).replace(/\n/g, "<br/>");
+    // ===== 내일 코디 힌트(추가) =====
+    if (data.tomorrow_tip_text && document.getElementById("tomorrowTipText")) {
+      document.getElementById("tomorrowTipText").innerHTML = String(data.tomorrow_tip_text).replace(/\n/g, "<br/>");
     }
+
   } catch (e) {
     console.warn("api/weather error:", e);
   }
